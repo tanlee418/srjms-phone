@@ -253,7 +253,11 @@
   #vcall .ctrl { position: absolute; left: 0; right: 0; bottom: 12cqw; display: flex; justify-content: space-evenly; align-items: flex-start; }
   #vcall .ctrl .b { display: flex; flex-direction: column; align-items: center; gap: 2cqw; color: #fff; font-size: 3.1cqw; text-shadow: 0 0 1.5cqw rgba(0,0,0,.5); }
   #vcall .ctrl .c { width: 15cqw; height: 15cqw; border-radius: 50%; background: rgba(255,255,255,.22); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; }
-  #vcall .ctrl .b.end { cursor: pointer; }
+  #vcall .ctrl .b.end, #vcall .ctrl .b.mute { cursor: pointer; }
+  #vcall .ctrl .b.mute .c { color: #fff; transition: background .15s, color .15s; }
+  #vcall .ctrl .b.mute .slash { display: none; }
+  #vcall .ctrl .b.mute.on .c { background: #fff; color: #111; }
+  #vcall .ctrl .b.mute.on .slash { display: inline; }
   #vcall .ctrl .b.end .c { background: #f04452; }
 </style>
 </head>
@@ -356,7 +360,7 @@
     <div class="sbar light" data-sbar></div>
     <div class="top"><div class="nm" id="vName"></div><div class="tm" id="vTime">00:00</div></div>
     <div class="ctrl">
-      <div class="b"><div class="c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="9" y="3.5" width="6" height="11" rx="3" fill="#fff"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5v3" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div>음소거</div>
+      <div class="b mute" id="muteBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="9" y="3.5" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path class="slash" d="M4.5 3.5l15 17" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></div>음소거</div>
       <div class="b end" id="endBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:7.4cqw;height:7.4cqw"><path d="M12 9.5c-3.4 0-6.5 1-8.4 2.6-.6.5-.7 1.4-.3 2l1.2 1.7c.4.6 1.2.8 1.9.5l2.4-1c.6-.3 1-.9.9-1.5l-.1-1.3c1.5-.5 3.3-.5 4.8 0l-.1 1.3c0 .6.3 1.2.9 1.5l2.4 1c.7.3 1.5.1 1.9-.5l1.2-1.7c.4-.6.3-1.5-.3-2C18.5 10.5 15.4 9.5 12 9.5Z" fill="#fff"/></svg></div>종료</div>
       <div class="b"><div class="c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5Z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9 11.5a3 3 0 0 1 5.4-1.6M15 13.5a3 3 0 0 1-5.4 1.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></div>카메라 전환</div>
     </div>
@@ -385,6 +389,14 @@ const STORY = {
     { keywords: ["웅", "응", "바빠"], action: "messages",
       messages: ["ㅠㅠㅠㅠㅠㅠㅠㅠㅠ", "알아써", "나중에 끝나면 말해!", "사랑해 🩵🩵"], next: 'busy' }
   ],
+  // 언제든 통하는 대답 (위의 규칙에 안 걸렸을 때, 앞에 있는 것부터 확인)
+  anytime: [
+    { keywords: ["코코언니", "코코 언니", "코짱"], messages: ["코코?", "나는??ㅠㅠ"] },
+    { keywords: ["지마니", "언니"], messages: ["웅?"] }
+  ],
+  // 지마니 페이스톡을 이만큼 이상 거절하면 오는 카톡
+  manyDeclines: 3,
+  afterManyDeclines: ["뭐야아....", "하기 싫어?", "보고싶어...."],
   readDelay: 1500,                      // 보낸 카톡을 지마니가 읽기까지 (숫자 1이 사라짐)
 
   afterCall: ["사랑해!!", "이따 보쟝"],
@@ -838,6 +850,7 @@ function incomingCall() {
   startRing();
   missTimer = setTimeout(declineCall, STORY.missedAfter);
 }
+let declineCount = 0;
 function declineCall() {
   if (!ringing) return;
   ringing = false;
@@ -845,8 +858,10 @@ function declineCall() {
   $('call').classList.remove('open');
   addMsg({ from: 'j', type: 'call', text: '부재중', missed: true });
   mode = 'decline';
+  declineCount++;
   if (!chatOpen) bannerNotify('부재중 페이스톡');
-  typeOut(STORY.afterDecline, STORY.afterDeclineDelay, enableTyping);
+  const msgs = declineCount >= STORY.manyDeclines ? STORY.afterManyDeclines : STORY.afterDecline;
+  typeOut(msgs, STORY.afterDeclineDelay, enableTyping);
 }
 let tick, secs = 0;
 const vid = $('vid'), vidMe = $('vidMe');
@@ -861,6 +876,7 @@ function acceptCall() {
 }
 function startVideoCall() {
   $('vcall').classList.add('open');
+  vid.muted = false; $('muteBtn').classList.remove('on');   // 새 통화는 소리 켜진 상태로
   inCall = true; secs = 0; $('vTime').textContent = '00:00';
   tick = setInterval(() => { secs++; $('vTime').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; }, 1000);
   [vid, vidMe].forEach(v => { v.style.display = ''; v.onerror = () => { v.style.display = 'none'; }; });
@@ -919,6 +935,11 @@ $('cancelBtn').addEventListener('click', cancelOutgoing);
 $('declineBtn').addEventListener('click', declineCall);
 $('acceptBtn').addEventListener('click', acceptCall);
 $('endBtn').addEventListener('click', () => endCall(false));
+// 음소거: 누르면 영상 소리 끄기/켜기
+$('muteBtn').addEventListener('click', () => {
+  vid.muted = !vid.muted;
+  $('muteBtn').classList.toggle('on', vid.muted);
+});
 
 // ---------- 독자가 직접 카톡 보내기 ----------
 const input = $('chatInput'), bar = $('inputBar');
@@ -947,7 +968,8 @@ function sendMine() {
   const rules = mode === 'earlyEnd' ? [{ keywords: STORY.earlyEndKeywords, action: 'call' }]
     : mode === 'busy' ? [{ keywords: STORY.doneKeywords, action: 'outcall' }]
     : STORY.replies;
-  const rule = rules.find(r => r.keywords.some(k => text.includes(k)));
+  const rule = rules.find(r => r.keywords.some(k => text.includes(k)))
+    || STORY.anytime.find(r => r.keywords.some(k => text.includes(k)));
   // 지마니가 읽음 (1 사라짐)
   setTimeout(() => {
     markAllRead();
