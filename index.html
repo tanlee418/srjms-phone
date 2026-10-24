@@ -158,9 +158,19 @@
   .k-me .k-bub.first::before { left: auto; right: -1.3cqw; background: #fee500; clip-path: polygon(0 0, 100% 0, 0 100%); }
   .k-meta { display: flex; flex-direction: column; align-items: flex-end; flex: none; padding-bottom: .2cqw; }
   .k-meta .unread { font-size: 2.65cqw; font-weight: 700; color: #f5c400; line-height: 1.2; }
+  /* 공감(하트) 반응 */
+  .k-line.has-react { margin-bottom: 3.4cqw; }
+  .k-react {
+    position: absolute; left: -1.2cqw; bottom: -3.6cqw; z-index: 1;
+    display: flex; align-items: center; gap: .6cqw; padding: .5cqw 1.6cqw .5cqw 1.2cqw;
+    background: #fff; border-radius: 4cqw; box-shadow: 0 .3cqw 1cqw rgba(0,0,0,.12);
+    font-size: 3cqw; color: #555; line-height: 1.2; animation: reactIn .35s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .k-react .h { font-size: 3.3cqw; }
+  @keyframes reactIn { from { transform: scale(.3); opacity: 0; } to { transform: none; opacity: 1; } }
   /* 사진 메시지 */
   .k-photo { display: block; border-radius: 3.4cqw; overflow: hidden; cursor: pointer; line-height: 0; }
-  .k-photo img { width: 46cqw; height: auto; display: block; }
+  .k-photo img { width: 46cqw; height: auto; display: block; background: rgba(255,255,255,.35); object-fit: cover; }
   .k-photo.wide img { width: 56cqw; }
   .k-photo.two { display: grid; grid-template-columns: 1fr 1fr; gap: .6cqw; }
   .k-photo.two img { width: 29cqw; height: 29cqw; object-fit: cover; }
@@ -212,6 +222,20 @@
   #call .btn.no .c { background: #f04452; }
   #call .btn.yes .c { background: #2fc25b; animation: breathe 1.6s ease-in-out infinite; }
   @keyframes breathe { 50% { transform: scale(1.06); } }
+
+  /* ---------------- 사랑이가 거는 페이스톡 화면 ---------------- */
+  #ocall { z-index: 10; display: none; background: #000; }
+  #ocall.open { display: block; animation: callIn .4s ease both; }
+  #ocall .self { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #ocall .shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.1) 40%, rgba(0,0,0,.1) 65%, rgba(0,0,0,.55) 100%); }
+  #ocall .who { position: absolute; top: 22cqw; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; color: #fff; text-shadow: 0 0 2cqw rgba(0,0,0,.35); }
+  #ocall .who .pf { width: 21cqw; height: 21cqw; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .6cqw rgba(255,255,255,.25); }
+  #ocall .who .nm { font-size: 6.4cqw; font-weight: 700; margin-top: 4cqw; }
+  #ocall .who .sub { font-size: 3.6cqw; opacity: .85; margin-top: 1.6cqw; }
+  #ocall .who .sub i { font-style: normal; animation: dots 1.4s steps(4) infinite; display: inline-block; width: 3.5cqw; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
+  @keyframes dots { from { width: 0; } to { width: 3.5cqw; } }
+  #ocall .cancel { position: absolute; left: 0; right: 0; bottom: 18cqw; display: flex; flex-direction: column; align-items: center; gap: 2.4cqw; color: #fff; font-size: 3.4cqw; cursor: pointer; }
+  #ocall .cancel .c { width: 18cqw; height: 18cqw; border-radius: 50%; background: #f04452; display: flex; align-items: center; justify-content: center; }
 
   /* ---------------- 페이스톡 통화 중 화면 ---------------- */
   #vcall { z-index: 11; display: none; background: #000; }
@@ -308,6 +332,21 @@
     <div class="home-ind" style="background:#fff"></div>
   </div>
 
+  <!-- 사랑이가 거는 페이스톡 화면 -->
+  <div class="screen" id="ocall">
+    <img class="self" src="img/sarang_poster.jpg" alt="">
+    <video class="self" id="vidCalling" playsinline preload="auto"></video>
+    <div class="shade"></div>
+    <div class="sbar light" data-sbar></div>
+    <div class="who">
+      <img class="pf" src="img/jimin.jpg" alt="">
+      <div class="nm" id="ocallName"></div>
+      <div class="sub">페이스톡 연결중<i>...</i></div>
+    </div>
+    <div class="cancel" id="cancelBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:8.5cqw;height:8.5cqw"><path d="M12 9.5c-3.4 0-6.5 1-8.4 2.6-.6.5-.7 1.4-.3 2l1.2 1.7c.4.6 1.2.8 1.9.5l2.4-1c.6-.3 1-.9.9-1.5l-.1-1.3c1.5-.5 3.3-.5 4.8 0l-.1 1.3c0 .6.3 1.2.9 1.5l2.4 1c.7.3 1.5.1 1.9-.5l1.2-1.7c.4-.6.3-1.5-.3-2C18.5 10.5 15.4 9.5 12 9.5Z" fill="#fff"/></svg></div>취소</div>
+    <div class="home-ind" style="background:#fff"></div>
+  </div>
+
   <!-- 페이스톡 통화 중 화면 -->
   <div class="screen" id="vcall">
     <img class="ph" src="img/jimin_first.jpg" alt="">
@@ -337,14 +376,14 @@ const STORY = {
 
   callDelay: 2000,                      // 카톡방 들어가고 페이스톡 오기까지
   missedAfter: 30000,                   // 이 시간 동안 안 받으면 끊은 걸로 처리
-  afterDecline: ["왜 끊어 ㅠㅠ", "바빠??"], // 전화 끊으면 오는 카톡
+  afterDecline: ["왜 안 받아 ㅠㅠ", "바빠??"], // 전화 끊으면 오는 카톡
   afterDeclineDelay: 1500,              // 끊고 나서 첫 카톡까지
 
   // 독자가 카톡을 보냈을 때: 앞에 있는 규칙부터 확인해요
   replies: [
     { keywords: ["미안", "다시"], action: "call" },        // → 다시 페이스톡
     { keywords: ["웅", "응", "바빠"], action: "messages",
-      messages: ["ㅠㅠㅠㅠㅠㅠㅠㅠㅠ", "알아써", "나중에 끝나면 전화해!", "사랑해 🩵🩵"] }
+      messages: ["ㅠㅠㅠㅠㅠㅠㅠㅠㅠ", "알아써", "나중에 끝나면 말해!", "사랑해 🩵🩵"], next: 'busy' }
   ],
   readDelay: 1500,                      // 보낸 카톡을 지마니가 읽기까지 (숫자 1이 사라짐)
 
@@ -353,6 +392,13 @@ const STORY = {
   earlyEnd: ["나 아직 말하구 있는데 왜 끊어 ㅠㅠㅠㅠㅠ", "무슨 일 있어??"],
   earlyEndKeywords: ["미안", "다시"],   // 페이스톡 끝나고 오는 카톡 (이후엔 독자가 보내도 안 읽음)
   afterCallDelay: 1500,
+  // 그 뒤에 이 말이 들어간 카톡을 보내면 지마니가 읽고 하트로 반응 (답장은 없음)
+  heartKeywords: ["나두", "나도", "사랑해"],
+  // "나중에 끝나면 말해!" 다음에 이 말이 들어가면 사랑이가 페이스톡을 걸어요
+  doneKeywords: ["끝났", "끝나써", "끝낫", "끝남", "다 끝"],
+  outCallDelay: 2000,                   // 지마니가 읽고 사랑이가 걸기까지
+  outCallVideo: "video/sarang_calling.mp4", // 거는 동안 나오는 사랑이 화면 (끝나면 지마니가 받음)
+  heartDelay: 2500,
 
   videoJimin: "video/jimin.mp4",        // 페이스톡 큰 화면 (지마니)
   videoMe: "video/sarang.mp4"           // 페이스톡 작은 화면 (사랑이)
@@ -514,6 +560,7 @@ $('lockDate').textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 ($
 $('chatName').textContent = STORY.sender;
 $('callName').textContent = STORY.sender;
 $('vName').textContent = STORY.sender;
+$('ocallName').textContent = STORY.sender;
 
 // ---------- 소리 (아이폰 무음모드에서도 나오도록) ----------
 let actx = null;
@@ -551,6 +598,21 @@ function ringOnce() {
 }
 function startRing() { ringOnce(); ringTimer = setInterval(ringOnce, 2600); }
 function stopRing() { clearInterval(ringTimer); ringTimer = null; }
+// 거는 쪽 연결음 (뚜-루루) - 직접 만든 소리
+function ringbackOnce() {
+  if (!actx) return;
+  const t0 = actx.currentTime + 0.05;
+  [[0, 523.25], [0.32, 659.25], [0.5, 783.99]].forEach(([dt, f]) => {
+    const g = actx.createGain(); g.connect(actx.destination);
+    const t = t0 + dt;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    const o = actx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+    o.connect(g); o.start(t); o.stop(t + 0.5);
+  });
+}
+function startRingback() { ringbackOnce(); ringTimer = setInterval(ringbackOnce, 2000); }
 
 // ---------- 카톡 대화 기록 ----------
 // from: 'j' = 지마니, 'me' = 사랑이 / type: 'text' | 'photo' | 'call'
@@ -578,10 +640,13 @@ const TODAY = ymd(new Date());
 })();
 const CAM_ICON = '<svg viewBox="0 0 24 24" style="width:4.6cqw;height:4.6cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#555"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#555"/></svg>';
 const PHONE_ICON = '<svg viewBox="0 0 24 24" style="width:4.4cqw;height:4.4cqw"><path d="M7.2 3.5c.5-.2 1.1 0 1.4.5l1.7 3c.3.5.2 1.1-.2 1.5L8.8 9.7c.9 2.2 2.6 3.9 4.8 4.8l1.2-1.3c.4-.4 1-.5 1.5-.2l3 1.7c.5.3.7.9.5 1.4l-.7 1.9c-.3.8-1.1 1.3-2 1.2C10.6 18.7 5.3 13.4 4.8 6.9c-.1-.9.4-1.7 1.2-2Z" fill="#555"/></svg>';
+const PHOTO_RATIO = { 'img/chat/p7.jpg': '4 / 3' };   // 가로 사진만 적어두기 (나머지는 세로 3:4)
 function bubble(m, tail) {
   if (m.type === 'photo') {
     const cls = m.photos.length > 1 ? ' two' : '';
-    return `<div class="k-photo${cls}">${m.photos.map(src => `<img src="${src}" alt="" data-full="${src}">`).join('')}</div>`;
+    // 사진 비율을 미리 정해둬서 불러오는 동안 화면이 밀리지 않게
+    const ratio = src => (PHOTO_RATIO[src] || '3 / 4');
+    return `<div class="k-photo${cls}">${m.photos.map(src => `<img src="${src}" alt="" data-full="${src}" style="aspect-ratio:${m.photos.length > 1 ? '1 / 1' : ratio(src)}">`).join('')}</div>`;
   }
   if (m.type === 'call') {
     const kind = m.kind || '페이스톡';
@@ -595,7 +660,49 @@ function dateLine(ds) {
   const wd = DAYS[new Date(y, mo - 1, d).getDay()];
   return `<div class="k-date">${DATE_ICON}${y}년 ${mo}월 ${d}일 ${wd}요일</div>`;
 }
-let stickBottom = true;
+let stickBottom = true, rendered = false, lastDateShown = null;
+const REACT = '<div class="k-react"><span class="h">❤️</span>1</div>';
+function lineHTML(m, isFirst, withTime) {
+  const t = withTime ? `<span class="k-time">${kakaoTime(m.min)}</span>` : '';
+  if (m.from === 'j') return `<div class="k-line">${bubble(m, isFirst)}${t}</div>`;
+  return `<div class="k-line${m.react ? ' has-react' : ''}" data-id="${m.id || ''}"><div class="k-meta">${m.read ? '' : '<span class="unread">1</span>'}${t}</div>${bubble(m, isFirst)}</div>`;
+}
+let msgId = 0;
+function heartReact(m) {
+  m.react = true;
+  const line = document.querySelector(`#chatBody .k-line[data-id="${m.id}"]`);
+  if (!line) return;
+  line.classList.add('has-react');
+  const b = line.querySelector('.k-bub');
+  if (b) b.insertAdjacentHTML('beforeend', REACT);
+  const body = $('chatBody');
+  body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+}
+function groupHTML(m) {
+  const key = `${m.from}|${m.date}|${m.min}`;
+  if (m.from === 'j') return `<div class="k-grp" data-key="${key}"><img class="pf" src="img/jimin.jpg" alt=""><div class="col"><div class="who">${esc(STORY.sender)}</div>${lineHTML(m, true, true)}</div></div>`;
+  return `<div class="k-me" data-key="${key}">${lineHTML(m, true, true)}</div>`;
+}
+// 새 카톡 한 개만 아래에 붙이기 (전체를 다시 그리지 않아서 화면이 흔들리지 않음)
+function appendMsg(m) {
+  const body = $('chatBody');
+  const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < body.clientHeight * 0.5;
+  const key = `${m.from}|${m.date}|${m.min}`;
+  const last = body.lastElementChild;
+  if (last && last.dataset.key === key) {
+    const old = last.querySelector('.k-line:last-child .k-time');
+    if (old) old.remove();
+    (m.from === 'j' ? last.querySelector('.col') : last).insertAdjacentHTML('beforeend', lineHTML(m, false, true));
+  } else {
+    if (lastDateShown !== m.date) { body.insertAdjacentHTML('beforeend', dateLine(m.date)); lastDateShown = m.date; }
+    body.insertAdjacentHTML('beforeend', groupHTML(m));
+  }
+  if (nearBottom || chatOpen) body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+}
+function markAllRead() {
+  messages.forEach(m => { if (m.from === 'me') m.read = true; });
+  document.querySelectorAll('#chatBody .unread').forEach(u => u.remove());
+}
 function renderChat() {
   const body = $('chatBody');
   let html = '';
@@ -627,6 +734,8 @@ function renderChat() {
     }
   });
   ensureDate(TODAY);
+  lastDateShown = lastDate;
+  rendered = true;
   body.innerHTML = html;
   body.scrollTop = body.scrollHeight;
   stickBottom = true;
@@ -634,7 +743,7 @@ function renderChat() {
 }
 $('chatBody').addEventListener('touchstart', () => { stickBottom = false; }, { passive: true });
 $('chatBody').addEventListener('wheel', () => { stickBottom = false; }, { passive: true });
-function addMsg(m) { m.min = nowMin(); m.date = TODAY; messages.push(m); renderChat(); }
+function addMsg(m) { m.id = ++msgId; m.min = nowMin(); m.date = TODAY; messages.push(m); if (rendered) appendMsg(m); else renderChat(); }
 
 // 사진 누르면 크게 보기
 $('chatBody').addEventListener('click', e => {
@@ -705,7 +814,8 @@ function openChat() {
   chat.classList.remove('closing');
   chat.classList.add('open');
   chatOpen = true;
-  renderChat();
+  if (!rendered) renderChat();
+  else { const b = $('chatBody'); b.scrollTop = b.scrollHeight; }
   if (!callStarted) { callStarted = true; setTimeout(incomingCall, STORY.callDelay); }
 }
 function closeChat() {
@@ -740,11 +850,16 @@ function declineCall() {
 }
 let tick, secs = 0;
 const vid = $('vid'), vidMe = $('vidMe');
+let callFrom = 'j';   // 누가 건 통화인지 ('j' = 지마니, 'me' = 사랑이)
 function acceptCall() {
   if (!ringing) return;
   ringing = false;
   clearTimeout(missTimer); stopRing();
   $('call').classList.remove('open');
+  callFrom = 'j';
+  startVideoCall();
+}
+function startVideoCall() {
   $('vcall').classList.add('open');
   inCall = true; secs = 0; $('vTime').textContent = '00:00';
   tick = setInterval(() => { secs++; $('vTime').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; }, 1000);
@@ -761,7 +876,7 @@ function endCall(finished) {
   vid.pause(); vidMe.pause();
   $('vcall').classList.remove('open');
   const mm = String(Math.floor(secs / 60)).padStart(2, '0'), ss = String(secs % 60).padStart(2, '0');
-  addMsg({ from: 'j', type: 'call', text: `통화시간 ${mm}:${ss}` });
+  addMsg({ from: callFrom, type: 'call', text: `통화시간 ${mm}:${ss}`, read: true });
   if (finished === true) {
     callDone = true;
     typeOut(STORY.afterCall, STORY.afterCallDelay, enableTyping);
@@ -770,6 +885,37 @@ function endCall(finished) {
     typeOut(STORY.earlyEnd, STORY.afterDeclineDelay, enableTyping);
   }
 }
+// 사랑이가 거는 페이스톡
+let pickupTimer, outgoing = false;
+function outgoingCall() {
+  if (inCall || ringing || outgoing) return;
+  outgoing = true;
+  $('chatInput').blur();
+  $('ocall').classList.add('open');
+  const vc = $('vidCalling');
+  const pickUp = () => {                    // 영상이 끝나면 지마니가 받음
+    if (!outgoing) return;
+    outgoing = false; clearTimeout(pickupTimer); vc.pause();
+    $('ocall').classList.remove('open');
+    callFrom = 'me';
+    startVideoCall();
+  };
+  vc.onended = pickUp;
+  vc.onerror = () => { vc.style.display = 'none'; pickupTimer = setTimeout(pickUp, 3500); };
+  if (!vc.getAttribute('src')) vc.src = STORY.outCallVideo;
+  vc.currentTime = 0; vc.muted = false; vc.style.display = '';
+  const p = vc.play();
+  if (p && p.catch) p.catch(() => { vc.muted = true; vc.play().catch(() => { pickupTimer = setTimeout(pickUp, 3500); }); });
+  pickupTimer = setTimeout(pickUp, 15000);  // 혹시 영상이 멈춰도 넘어가도록
+}
+function cancelOutgoing() {
+  if (!outgoing) return;
+  outgoing = false; clearTimeout(pickupTimer); $('vidCalling').pause();
+  $('ocall').classList.remove('open');
+  addMsg({ from: 'me', type: 'call', text: '취소', read: true });
+  mode = 'busy';                            // 다시 "끝났어" 하면 또 걸 수 있음
+}
+$('cancelBtn').addEventListener('click', cancelOutgoing);
 $('declineBtn').addEventListener('click', declineCall);
 $('acceptBtn').addEventListener('click', acceptCall);
 $('endBtn').addEventListener('click', () => endCall(false));
@@ -791,18 +937,24 @@ function sendMine() {
   input.value = ''; bar.classList.remove('typing');
   const mine = { from: 'me', type: 'text', text, read: false };
   addMsg(mine);
-  if (callDone) return;            // 페이스톡 이후엔 지마니가 안 읽음 (1 그대로)
-  const rules = mode === 'earlyEnd'
-    ? [{ keywords: STORY.earlyEndKeywords, action: 'call' }]
+  if (callDone) {
+    // 페이스톡 이후: 사랑한다는 답이면 읽고 하트 반응, 아니면 안 읽음 (1 그대로)
+    if (STORY.heartKeywords.some(k => text.includes(k))) {
+      setTimeout(() => { markAllRead(); setTimeout(() => heartReact(mine), 700); }, STORY.heartDelay);
+    }
+    return;
+  }
+  const rules = mode === 'earlyEnd' ? [{ keywords: STORY.earlyEndKeywords, action: 'call' }]
+    : mode === 'busy' ? [{ keywords: STORY.doneKeywords, action: 'outcall' }]
     : STORY.replies;
   const rule = rules.find(r => r.keywords.some(k => text.includes(k)));
   // 지마니가 읽음 (1 사라짐)
   setTimeout(() => {
-    messages.forEach(m => { if (m.from === 'me') m.read = true; });
-    renderChat();
+    markAllRead();
     if (!rule) return;
     if (rule.action === 'call') setTimeout(incomingCall, 2500);
-    else typeOut(rule.messages, 1800);
+    else if (rule.action === 'outcall') setTimeout(outgoingCall, STORY.outCallDelay);
+    else { if (rule.next) mode = rule.next; typeOut(rule.messages, 1800); }
   }, STORY.readDelay);
 }
 
