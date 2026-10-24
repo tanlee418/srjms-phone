@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<title>iPhone</title>
+<style>
+  /* =========================================================
+     레이아웃: 화면 비율(1179 x 2556)을 그대로 유지하면서
+     브라우저 창 안에 꽉 차게 맞춤. 모든 크기는 cqw(화면 폭의 1%) 단위.
+     ========================================================= */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; overflow: hidden; overscroll-behavior: none; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    -webkit-user-select: none; user-select: none; touch-action: none;
+  }
+  .phone {
+    position: relative;
+    width: min(100vw, calc(100dvh * 1179 / 2556));
+    aspect-ratio: 1179 / 2556;
+    overflow: hidden;
+    container-type: inline-size;
+    background: #000;
+  }
+  @supports not (height: 100dvh) {
+    .phone { width: min(100vw, calc(100vh * 1179 / 2556)); }
+  }
+  .screen { position: absolute; inset: 0; overflow: hidden; }
+  .screen > img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+  img { -webkit-user-drag: none; }
+
+  /* ---------------- 상태바 (직접 그린 버전) ---------------- */
+  .sbar { position: absolute; top: 0; left: 0; right: 0; height: 13.5cqw; z-index: 3; pointer-events: none; }
+  .sbar .t {
+    position: absolute; top: 6.78cqw; left: 18.75cqw; transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 1.2cqw;
+    font-size: 4.6cqw; font-weight: 600; letter-spacing: -0.02em;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+  .sbar .t img { height: 3.6cqw; width: auto; }
+  .sbar.dark { color: #000; } .sbar.dark .t img { filter: invert(1); }
+  .sbar.light { color: #fff; }
+  .sbar .r { position: absolute; top: 6.78cqw; right: 15.6cqw; transform: translateY(-50%); display: flex; align-items: center; gap: 1.5cqw; }
+  .sbar .r svg { display: block; }
+
+  /* ---------------- 홈 화면 ---------------- */
+  #home { transform: scale(1.12); opacity: 0; transition: transform .55s cubic-bezier(.2,.9,.25,1), opacity .35s ease; }
+  #home.on { transform: scale(1); opacity: 1; }
+  .hotspot { position: absolute; border-radius: 22%; cursor: pointer; }
+  .hotspot:active { background: rgba(0,0,0,.18); }
+
+  /* ---------------- 잠금 화면 ---------------- */
+  #lock { z-index: 6; will-change: transform; }
+  #lock.anim { transition: transform .45s cubic-bezier(.25,.9,.3,1); }
+  .lock-date {
+    position: absolute; top: 20.6cqw; left: 49.8%; transform: translateX(-50%);
+    font-size: 5.25cqw; font-weight: 600; line-height: 1; white-space: nowrap;
+    color: #f7ecd2; letter-spacing: -0.01em;
+    text-shadow: 0 0 .6cqw rgba(90,60,20,.25);
+  }
+
+  /* ---------------- 알림 카드 공통 ---------------- */
+  .noti {
+    display: flex; align-items: center; gap: 3cqw;
+    padding: 3.3cqw 3.8cqw 3.3cqw 3.4cqw;
+    border-radius: 6.4cqw;
+    background: rgba(245,245,245,.55);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: 0 .4cqw 2cqw rgba(0,0,0,.08);
+    color: #111; cursor: pointer;
+  }
+  /* 프로필 사진 + 오른쪽 아래 작은 카톡 아이콘 (아이폰 메시지 알림 스타일) */
+  .noti .ava { position: relative; width: 10cqw; height: 10cqw; flex: none; }
+  .noti .ava .pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .noti .ava .app { position: absolute; right: -.9cqw; bottom: -.9cqw; width: 4.6cqw; height: 4.6cqw; border-radius: 1.2cqw; }
+  .noti .txt { flex: 1; min-width: 0; }
+  .noti .row { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; }
+  .noti .title { font-size: 3.85cqw; font-weight: 600; letter-spacing: -0.01em; }
+  .noti .when { font-size: 3.25cqw; color: rgba(0,0,0,.45); flex: none; }
+  .noti .body { font-size: 3.85cqw; line-height: 1.3; margin-top: .3cqw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* 잠금화면: 아이폰처럼 겹쳐진 묶음. 새 알림이 위, 먼저 온 알림은 뒤로 살짝 아래에 */
+  .notifs { position: absolute; left: 3.6cqw; right: 3.6cqw; bottom: 36cqw; height: 0; }
+  .notifs .noti {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    transform-origin: 50% 100%;
+    transition: transform .45s cubic-bezier(.2,1,.3,1), background .35s, opacity .3s;
+    animation: notiIn .55s cubic-bezier(.2,1.1,.3,1) both;
+  }
+  @keyframes notiIn {
+    from { transform: translateY(8cqw) scale(.9); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+  .notifs .noti .ava, .notifs .noti .txt { transition: opacity .25s; }
+  .notifs .noti.behind { animation: none; transform: translateY(3.4cqw) scale(.93); background: rgba(225,225,225,.6); }
+  .notifs .noti.behind2 { animation: none; transform: translateY(6.2cqw) scale(.86); background: rgba(210,210,210,.5); }
+  .notifs .noti.behind .ava, .notifs .noti.behind .txt,
+  .notifs .noti.behind2 .ava, .notifs .noti.behind2 .txt { opacity: 0; }
+
+  /* 홈화면 배너 */
+  .banner {
+    position: absolute; z-index: 20; left: 2.6cqw; right: 2.6cqw; top: 3cqw;
+    transform: translateY(-140%); transition: transform .5s cubic-bezier(.2,1.05,.3,1);
+    background: rgba(250,250,250,.78);
+  }
+  .banner.show { transform: translateY(0); }
+  .banner.pop .txt { animation: pop .35s ease; }
+  @keyframes pop { 0% { opacity: .2; transform: translateY(1.5cqw); } 100% { opacity: 1; transform: none; } }
+
+  /* ---------------- 카카오톡 채팅방 ---------------- */
+  #chat {
+    z-index: 4; background: #bacee0; display: none; flex-direction: column;
+    transform-origin: 50% 20%;
+  }
+  #chat.open { display: flex; animation: appIn .38s cubic-bezier(.2,.9,.3,1) both; }
+  #chat.closing { display: flex; animation: appOut .3s ease both; }
+  @keyframes appIn { from { transform: scale(.88); opacity: 0; border-radius: 12cqw; } to { transform: none; opacity: 1; border-radius: 0; } }
+  @keyframes appOut { to { transform: scale(.9); opacity: 0; } }
+  .k-head { position: relative; flex: none; height: 25cqw; }
+  .k-head .nav { position: absolute; left: 0; right: 0; top: 13.5cqw; height: 11cqw; display: flex; align-items: center; }
+  .k-head .back { width: 12cqw; height: 11cqw; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .k-head .name { position: absolute; left: 50%; transform: translateX(-50%); font-size: 4.5cqw; font-weight: 600; color: #222; }
+  .k-head .icons { margin-left: auto; display: flex; gap: 4.4cqw; padding-right: 4.4cqw; }
+  .k-body {
+    flex: 1; overflow-y: auto; padding: 2cqw 0 3cqw; touch-action: pan-y;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .k-body::-webkit-scrollbar { display: none; }
+  .k-date {
+    margin: 2cqw auto 4cqw; width: max-content; padding: 1.1cqw 3.4cqw;
+    border-radius: 5cqw; background: rgba(0,0,0,.13); color: #fff; font-size: 3cqw;
+    display: flex; align-items: center; gap: 1.2cqw;
+  }
+  .k-grp { display: flex; gap: 2.2cqw; padding: 0 3cqw; margin-bottom: 2.6cqw; }
+  .k-grp .pf { width: 10.6cqw; height: 10.6cqw; border-radius: 4.2cqw; object-fit: cover; flex: none; }
+  .k-grp .col { display: flex; flex-direction: column; gap: 1.2cqw; min-width: 0; }
+  .k-grp .who { font-size: 3.2cqw; color: #4a5560; margin: .4cqw 0 .2cqw; }
+  .k-line { display: flex; align-items: flex-end; gap: 1.4cqw; }
+  .k-bub {
+    position: relative; background: #fff; color: #111;
+    font-size: 3.95cqw; line-height: 1.38; padding: 2.1cqw 3cqw;
+    border-radius: 3.6cqw; max-width: 62cqw; word-break: break-all;
+  }
+  .k-bub.first::before {
+    content: ""; position: absolute; left: -1.3cqw; top: 0; width: 3cqw; height: 3cqw;
+    background: #fff; clip-path: polygon(100% 0, 0 0, 100% 100%);
+  }
+  .k-time { font-size: 2.65cqw; color: #55636f; white-space: nowrap; flex: none; padding-bottom: .2cqw; }
+  /* 내가 보낸 카톡 (오른쪽, 노란 말풍선) */
+  .k-me { display: flex; flex-direction: column; align-items: flex-end; gap: 1.2cqw; padding: 0 3cqw; margin-bottom: 2.6cqw; }
+  .k-me .k-line { justify-content: flex-end; }
+  .k-me .k-bub { background: #fee500; }
+  .k-me .k-bub.first::before { left: auto; right: -1.3cqw; background: #fee500; clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .k-meta { display: flex; flex-direction: column; align-items: flex-end; flex: none; padding-bottom: .2cqw; }
+  .k-meta .unread { font-size: 2.65cqw; font-weight: 700; color: #f5c400; line-height: 1.2; }
+  /* 사진 메시지 */
+  .k-photo { display: block; border-radius: 3.4cqw; overflow: hidden; cursor: pointer; line-height: 0; }
+  .k-photo img { width: 46cqw; height: auto; display: block; }
+  .k-photo.wide img { width: 56cqw; }
+  .k-photo.two { display: grid; grid-template-columns: 1fr 1fr; gap: .6cqw; }
+  .k-photo.two img { width: 29cqw; height: 29cqw; object-fit: cover; }
+  .k-me .k-call { background: #fee500; }
+  .k-me .k-call .ic { background: rgba(0,0,0,.07); }
+  .k-me .k-call .t2 { color: #6b5b00; }
+  /* 사진 크게 보기 */
+  #viewer { position: absolute; inset: 0; z-index: 15; background: #000; display: none; align-items: center; justify-content: center; }
+  #viewer.open { display: flex; animation: callIn .2s ease both; }
+  #viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  #viewer .x { position: absolute; top: 14cqw; left: 4cqw; width: 10cqw; height: 10cqw; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  /* 통화 기록 말풍선 */
+  .k-call { display: flex; align-items: center; gap: 2.4cqw; padding: 2.4cqw 4cqw 2.4cqw 2.6cqw; }
+  .k-call .ic { width: 8.4cqw; height: 8.4cqw; border-radius: 50%; background: #f1f1f1; display: flex; align-items: center; justify-content: center; flex: none; }
+  .k-call .t1 { font-size: 3.9cqw; }
+  .k-call .t2 { font-size: 3.1cqw; color: #8a8a8a; margin-top: .2cqw; }
+  .k-call.miss .t2 { color: #e5484d; }
+  .k-input {
+    flex: none; background: #fff; padding: 2.2cqw 3cqw 9cqw; display: flex; align-items: center; gap: 2.6cqw;
+  }
+  .k-input .field {
+    flex: 1; height: 9.4cqw; border-radius: 4.7cqw; background: #f3f3f3;
+    display: flex; align-items: center; gap: 1.6cqw; padding: 0 2.6cqw 0 3.6cqw;
+  }
+  .k-input input {
+    flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #111;
+    font-family: inherit; font-size: max(16px, 3.95cqw);
+    -webkit-user-select: text; user-select: text; touch-action: manipulation;
+  }
+  .k-input input:disabled { opacity: 1; -webkit-text-fill-color: #111; }
+  .k-input .send { display: none; width: 9.4cqw; height: 9.4cqw; border-radius: 3cqw; background: #fee500; align-items: center; justify-content: center; flex: none; cursor: pointer; }
+  .k-input.typing .send { display: flex; }
+  .k-input.typing .hash { display: none; }
+  .home-ind { position: absolute; left: 50%; bottom: 2.2cqw; width: 35cqw; height: 1.35cqw; border-radius: 1cqw; transform: translateX(-50%); background: #000; z-index: 5; }
+
+  /* ---------------- 카카오톡 페이스톡 수신 화면 ---------------- */
+  #call { z-index: 10; display: none; background: #1c1c1e; }
+  #call.open { display: block; animation: callIn .45s ease both; }
+  @keyframes callIn { from { opacity: 0; transform: translateY(6cqw); } to { opacity: 1; transform: none; } }
+  #call .blur { position: absolute; inset: -10%; width: 120%; height: 120%; object-fit: cover; filter: blur(28px) brightness(.5) saturate(1.1); }
+  #call .who { position: absolute; top: 40cqw; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; color: #fff; }
+  #call .who .pf { width: 30cqw; height: 30cqw; border-radius: 50%; object-fit: cover; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,.25); } 50% { box-shadow: 0 0 0 4cqw rgba(255,255,255,0); } }
+  #call .who .nm { font-size: 7cqw; font-weight: 700; margin-top: 6cqw; letter-spacing: -0.02em; }
+  #call .who .sub { font-size: 3.7cqw; opacity: .75; margin-top: 2cqw; display: flex; align-items: center; gap: 1.2cqw; }
+  #call .btns { position: absolute; left: 0; right: 0; bottom: 20cqw; display: flex; justify-content: space-between; padding: 0 14cqw; }
+  #call .btn { display: flex; flex-direction: column; align-items: center; gap: 2.4cqw; color: rgba(255,255,255,.9); font-size: 3.4cqw; cursor: pointer; }
+  #call .btn .c { width: 18cqw; height: 18cqw; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  #call .btn.no .c { background: #f04452; }
+  #call .btn.yes .c { background: #2fc25b; animation: breathe 1.6s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.06); } }
+
+  /* ---------------- 페이스톡 통화 중 화면 ---------------- */
+  #vcall { z-index: 11; display: none; background: #000; }
+  #vcall.open { display: block; animation: callIn .3s ease both; }
+  #vcall video, #vcall .ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #vcall .grad { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 72%, rgba(0,0,0,.5) 100%); pointer-events: none; }
+  #vcall .top { position: absolute; top: 16cqw; left: 5cqw; color: #fff; text-shadow: 0 0 2cqw rgba(0,0,0,.4); }
+  #vcall .top .nm { font-size: 5cqw; font-weight: 700; }
+  #vcall .top .tm { font-size: 3.4cqw; opacity: .9; margin-top: .8cqw; font-variant-numeric: tabular-nums; }
+  #vcall .me {
+    position: absolute; top: 14cqw; right: 4cqw; width: 27cqw; aspect-ratio: 3 / 4; border-radius: 3.4cqw; overflow: hidden;
+    background: #222; box-shadow: 0 1cqw 3cqw rgba(0,0,0,.35);
+  }
+  #vcall .me video, #vcall .me img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #vcall .ctrl { position: absolute; left: 0; right: 0; bottom: 12cqw; display: flex; justify-content: space-evenly; align-items: flex-start; }
+  #vcall .ctrl .b { display: flex; flex-direction: column; align-items: center; gap: 2cqw; color: #fff; font-size: 3.1cqw; text-shadow: 0 0 1.5cqw rgba(0,0,0,.5); }
+  #vcall .ctrl .c { width: 15cqw; height: 15cqw; border-radius: 50%; background: rgba(255,255,255,.22); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; }
+  #vcall .ctrl .b.end { cursor: pointer; }
+  #vcall .ctrl .b.end .c { background: #f04452; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- 홈 화면 -->
+  <div class="screen" id="home">
+    <img class="bg" src="img/home.jpg" alt="">
+    <div class="sbar light" style="right:auto;width:40cqw"><div class="t"><span class="clk">10:35</span></div></div>
+    <!-- 카카오톡 아이콘 (누르면 채팅방) -->
+    <div class="hotspot" id="kakaoIcon" style="left:7.6cqw; top:44.3cqw; width:15.9cqw; height:15.9cqw"></div>
+  </div>
+
+  <!-- 카카오톡 채팅방 -->
+  <div class="screen" id="chat">
+    <div class="k-head">
+      <div class="sbar dark" data-sbar></div>
+      <div class="nav">
+        <div class="back" id="chatBack">
+          <svg viewBox="0 0 24 24" style="width:5.6cqw;height:5.6cqw"><path d="M15 4 7 12l8 8" fill="none" stroke="#222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="name" id="chatName"></div>
+        <div class="icons">
+          <svg viewBox="0 0 24 24" style="width:5.8cqw;height:5.8cqw"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#222" stroke-width="1.9"/><path d="m15.5 15.5 5 5" stroke="#222" stroke-width="1.9" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" style="width:5.8cqw;height:5.8cqw"><path d="M3.5 6h17M3.5 12h17M3.5 18h17" stroke="#222" stroke-width="1.9" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="k-body" id="chatBody"></div>
+    <div class="k-input" id="inputBar">
+      <svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw;flex:none"><path d="M12 4v16M4 12h16" stroke="#555" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="field">
+        <input id="chatInput" type="text" enterkeyhint="send" autocomplete="off" disabled>
+        <svg viewBox="0 0 24 24" style="width:5.8cqw;height:5.8cqw"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#666" stroke-width="1.6"/><circle cx="9" cy="10" r="1.1" fill="#666"/><circle cx="15" cy="10" r="1.1" fill="#666"/><path d="M8.3 14c1 1.6 2.3 2.4 3.7 2.4s2.7-.8 3.7-2.4" fill="none" stroke="#666" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <svg class="hash" viewBox="0 0 24 24" style="width:6.2cqw;height:6.2cqw;flex:none"><path d="M9.5 4 8 20M16 4l-1.5 16M4.5 9h16M3.5 15h16" stroke="#555" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <div class="send" id="sendBtn"><svg viewBox="0 0 24 24" style="width:5.4cqw;height:5.4cqw"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="#3a2a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="home-ind"></div>
+  </div>
+
+  <!-- 사진 크게 보기 -->
+  <div id="viewer"><img id="viewerImg" alt=""><div class="x"><svg viewBox="0 0 24 24" style="width:6cqw;height:6cqw"><path d="M5 5l14 14M19 5 5 19" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>
+
+  <!-- 홈화면 배너 알림 -->
+  <div class="noti banner" id="banner">
+    <div class="ava"><img class="pic" src="img/jimin.jpg" alt=""><img class="app" src="img/kakao.png" alt=""></div>
+    <div class="txt">
+      <div class="row"><span class="title" id="bannerTitle"></span><span class="when">지금</span></div>
+      <div class="body" id="bannerBody"></div>
+    </div>
+  </div>
+
+  <!-- 잠금 화면 -->
+  <div class="screen" id="lock">
+    <img class="bg" src="img/lock.jpg" alt="">
+    <div class="lock-date" id="lockDate"></div>
+    <div style="position:absolute;left:84.4cqw;top:7.4cqw;transform:translateY(-50%);color:#fff;line-height:0"><svg viewBox="0 0 30 13" style="width:7.4cqw;height:3.2cqw"><rect x=".5" y=".5" width="24" height="12" rx="3.8" fill="currentColor" opacity=".35"/><rect x=".5" y=".5" width="16.8" height="12" rx="3.8" fill="#ffd60a"/><rect x="25.6" y="4.2" width="1.8" height="4.6" rx=".9" fill="currentColor" opacity=".4"/><text x="10.5" y="9.9" text-anchor="middle" font-size="9.2" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif" fill="#000">70</text><path d="M21.6 1.6 17.4 7h2.6l-1.2 4.4L23 6h-2.6Z" fill="#000"/></svg></div>
+    <div class="notifs" id="notifs"></div>
+  </div>
+
+  <!-- 카카오톡 페이스톡 수신 화면 -->
+  <div class="screen" id="call">
+    <img class="blur" src="img/jimin_poster.jpg" alt="">
+    <div class="sbar light" data-sbar></div>
+    <div class="who">
+      <img class="pf" src="img/jimin.jpg" alt="">
+      <div class="nm" id="callName"></div>
+      <div class="sub"><svg viewBox="0 0 24 24" style="width:4cqw;height:4cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="rgba(255,255,255,.85)"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="rgba(255,255,255,.85)"/></svg>페이스톡 수신중...</div>
+    </div>
+    <div class="btns">
+      <div class="btn no" id="declineBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:8.5cqw;height:8.5cqw"><path d="M12 9.5c-3.4 0-6.5 1-8.4 2.6-.6.5-.7 1.4-.3 2l1.2 1.7c.4.6 1.2.8 1.9.5l2.4-1c.6-.3 1-.9.9-1.5l-.1-1.3c1.5-.5 3.3-.5 4.8 0l-.1 1.3c0 .6.3 1.2.9 1.5l2.4 1c.7.3 1.5.1 1.9-.5l1.2-1.7c.4-.6.3-1.5-.3-2C18.5 10.5 15.4 9.5 12 9.5Z" fill="#fff"/></svg></div>거절</div>
+      <div class="btn yes" id="acceptBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:8.5cqw;height:8.5cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#fff"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#fff"/></svg></div>수락</div>
+    </div>
+    <div class="home-ind" style="background:#fff"></div>
+  </div>
+
+  <!-- 페이스톡 통화 중 화면 -->
+  <div class="screen" id="vcall">
+    <img class="ph" src="img/jimin_first.jpg" alt="">
+    <video id="vid" playsinline preload="auto"></video>
+    <div class="me"><img src="img/sarang_poster.jpg" alt=""><video id="vidMe" playsinline muted preload="auto"></video></div>
+    <div class="grad"></div>
+    <div class="sbar light" data-sbar></div>
+    <div class="top"><div class="nm" id="vName"></div><div class="tm" id="vTime">00:00</div></div>
+    <div class="ctrl">
+      <div class="b"><div class="c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="9" y="3.5" width="6" height="11" rx="3" fill="#fff"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5v3" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></div>음소거</div>
+      <div class="b end" id="endBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:7.4cqw;height:7.4cqw"><path d="M12 9.5c-3.4 0-6.5 1-8.4 2.6-.6.5-.7 1.4-.3 2l1.2 1.7c.4.6 1.2.8 1.9.5l2.4-1c.6-.3 1-.9.9-1.5l-.1-1.3c1.5-.5 3.3-.5 4.8 0l-.1 1.3c0 .6.3 1.2.9 1.5l2.4 1c.7.3 1.5.1 1.9-.5l1.2-1.7c.4-.6.3-1.5-.3-2C18.5 10.5 15.4 9.5 12 9.5Z" fill="#fff"/></svg></div>종료</div>
+      <div class="b"><div class="c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5Z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9 11.5a3 3 0 0 1 5.4-1.6M15 13.5a3 3 0 0 1-5.4 1.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></div>카메라 전환</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ✏️ 여기만 고치면 내용/타이밍을 바꿀 수 있어요
+   ========================================================= */
+const STORY = {
+  sender: "지마니",
+  startTime: "22:35",                   // 이야기 시작 시각 (24시간제). 시간이 실제로 흘러가요
+  firstMessages: ["사랑아", "모해?"],   // 처음 오는 카톡
+  firstDelay: 2000,                     // 접속 후 첫 카톡까지 (ms, 2000 = 2초)
+  gap: 700,                             // 카톡 사이 간격 (ms)
+
+  callDelay: 2000,                      // 카톡방 들어가고 페이스톡 오기까지
+  missedAfter: 30000,                   // 이 시간 동안 안 받으면 끊은 걸로 처리
+  afterDecline: ["왜 끊어 ㅠㅠ", "바빠??"], // 전화 끊으면 오는 카톡
+  afterDeclineDelay: 1500,              // 끊고 나서 첫 카톡까지
+
+  // 독자가 카톡을 보냈을 때: 앞에 있는 규칙부터 확인해요
+  replies: [
+    { keywords: ["미안", "다시"], action: "call" },        // → 다시 페이스톡
+    { keywords: ["웅", "응", "바빠"], action: "messages",
+      messages: ["ㅠㅠㅠㅠㅠㅠㅠㅠㅠ", "알아써", "나중에 끝나면 전화해!", "사랑해 🩵🩵"] }
+  ],
+  readDelay: 1500,                      // 보낸 카톡을 지마니가 읽기까지 (숫자 1이 사라짐)
+
+  afterCall: ["사랑해!!", "이따 보쟝"],
+  // 영상 도중에 종료를 누르면 오는 카톡 → 답에 "미안"/"다시"가 있으면 다시 페이스톡
+  earlyEnd: ["나 아직 말하구 있는데 왜 끊어 ㅠㅠㅠㅠㅠ", "무슨 일 있어??"],
+  earlyEndKeywords: ["미안", "다시"],   // 페이스톡 끝나고 오는 카톡 (이후엔 독자가 보내도 안 읽음)
+  afterCallDelay: 1500,
+
+  videoJimin: "video/jimin.mp4",        // 페이스톡 큰 화면 (지마니)
+  videoMe: "video/sarang.mp4"           // 페이스톡 작은 화면 (사랑이)
+};
+/* =========================================================
+   ✏️ 예전 카톡 기록 ("사랑아 모해?" 이전 대화)
+   - "#날짜" 줄로 날짜를 바꿔요
+   - "시:분 지민: 내용" / "시:분 사랑: 내용" (24시간제)
+   - [사진1] 처럼 쓰면 img/chat/p1.jpg 사진, [사진5,6] 은 두 장 묶음
+   - [보이스톡 01:28] 은 통화 기록 말풍선
+   ========================================================= */
+const HISTORY = `
+#2026-02-09
+23:12 사랑: 언니.... 혹시 제 에어팟 언니 방에 있어요??
+23:13 지민: 에어팟?
+23:13 지민: 잠시만
+23:27 지민: 여기 없는 거 같은뎅...
+23:28 사랑: 아!
+23:28 사랑: 아까 후드 주머니에 넣어뒀당 헤헤...
+23:28 사랑: 죄송해요ㅠㅠ
+23:29 지민: ㅋㅋㅋㅋㅋ아냐
+23:29 사랑: 넵!
+23:29 사랑: 잘자요 언니
+
+#2026-02-19
+12:41 사랑: 언니 연습실 언제 가요??
+12:44 지민: 나?
+12:44 지민: 밥 먹구 좀 이따가
+12:44 지민: 사랑이 밥 먹었어?
+12:45 사랑: ㅠㅠㅠㅠ아뇨 아직
+12:45 지민: 그럼 같이 먹을래?
+12:46 사랑: 헉 좋아요
+12:46 사랑: 저 금방 씻구 나갈게요!!
+
+#2026-03-27
+16:02 지민: 사랑아...
+16:02 지민: 혹시 집에 내 에어팟 있어??
+16:02 지민: 내 방 책상쪽 한 번만 봐주라ㅠㅠ
+16:03 지민: 미안
+16:03 지민: 있으면 이따가 가져와줄 수 있으까...
+16:19 사랑: 언니 에어팟 케이스 원래 안 꼈나?
+16:19 사랑: 이거 맞아요?
+16:20 지민: 우웅
+16:20 지민: 마자
+16:21 사랑: 이거 한쪽만 잇어여
+16:21 사랑: 넹넹!
+16:21 지민: 고마오 ㅠ
+16:22 사랑: ㅋㄱㅋㄱㅋㄱㄱㅋㄱㅋ 넹ㄴ!!
+
+#2026-05-07
+10:48 사랑: 지마니이ㅣ 일어났어?
+11:03 지민: 우웅
+11:03 지민: 방금 일어났엉
+11:03 사랑: 내일 모하낭
+11:04 지민: ㅋㅋㅋㅋ 내일?
+11:04 지민: 저녁에 엄마랑 밥 먹을라구
+11:04 사랑: 그럼 낮에는??
+11:05 지민: 몰랑
+11:05 지민: 아직 머할지 안 정해써
+11:05 사랑: 그럼 나랑 오차즈케 머그러 갈 생각 있나아
+11:05 사랑: 내가 사주께!!
+11:06 지민: ㅋㅋㅋㅋㅋ 몇 시쯤?
+11:06 사랑: [보이스톡 01:28]
+
+#2026-05-08
+19:24 사랑: [사진1]
+
+#2026-06-14
+15:31 지민: [사진2]
+15:31 지민: 귀엽징
+15:31 지민: 얘 너 닮아써
+15:33 사랑: ㅋㅋㅋㅋㄱㅋㄱㄱㅋㄱ 헐 모야
+15:33 사랑: 귀엽다앙
+15:33 사랑: 어디야??
+15:34 지민: 나 지금 연습실
+15:34 지민: 너 언제와?
+15:34 사랑: 랑이 스케줄 끝나구 가는 중
+15:35 지민: 웅 언넝 와
+15:35 사랑: 언니언니
+15:35 지민: 응??
+15:36 사랑: [사진3]
+15:36 사랑: 저 강아지랑 이거 중에 누가 더 귀여워
+15:36 지민: ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+15:37 사랑: 웅???
+15:37 지민: 당연히 ...
+15:37 사랑: 랑이???
+15:38 지민: 강아지가 더 귀엽지
+15:38 지민: ㅋㅋㅋㅋ 질문이 그게 뭐야 사랑아
+15:46 지민: 헝? 아니아니
+15:46 지민: 오타나써 ㅠㅠㅠ
+15:46 지민: 랑아지라고 한 거야
+15:47 지민: 아니진짜루우ㅜ
+15:47 지민: 사랑아 오고이써??
+
+#2026-08-02
+22:14 지민: [사진4]
+22:14 지민: 사랑이 안경 내꺼
+22:20 사랑: 엥 모야
+22:20 지민: ㅋㅋㅋㅋㅋ
+22:20 지민: 잘 어울리지
+22:21 사랑: 웅 ㅎㅎ
+
+#2026-08-08
+19:42 사랑: [사진9]
+19:42 사랑: 지마니 하늘 봐바
+19:50 지민: 헝 잘 찍었다
+19:50 지민: 예쁘네
+
+#2026-09-09
+14:27 사랑: [사진5,6]
+14:31 지민: 고마오 ㅎㅎ
+14:31 지민: 여친짤이다 완전
+14:32 사랑: 아무래두..
+
+#2026-09-16
+18:05 지민: [사진7]
+18:05 지민: ㅎㅎ 잠든랑
+18:40 사랑: 모야!
+18:40 사랑: 언제 찍어써ㅠ
+
+#2026-09-22
+17:12 지민: [사진8]
+17:12 지민: 쪼꼬매
+17:12 지민: 뭐 사는 거지잉
+17:13 지민: 델리만쥬??
+17:13 지민: 지마니는 바삭어포 먹고시포
+17:13 지민: 사랑아ㅏㅏㅏ
+`;
+/* ========================================================= */
+
+const $ = id => document.getElementById(id);
+const lock = $('lock'), home = $('home'), phone = $('phone'), chat = $('chat');
+let unlocked = false, chatOpen = false, callStarted = false, inCall = false, ringing = false, callDone = false;
+
+// ---------- 시계: 시작 시각부터 실제로 흘러감 ----------
+const t0 = Date.now();
+const [SH, SM] = STORY.startTime.split(':').map(Number);
+function nowMin() { return SH * 60 + SM + Math.floor((Date.now() - t0) / 60000); }
+function clock12(m) { const h = Math.floor(m / 60) % 24, mm = m % 60; return `${(h % 12) || 12}:${String(mm).padStart(2, '0')}`; }
+function kakaoTime(m) { const h = Math.floor(m / 60) % 24; return `${h < 12 ? '오전' : '오후'} ${clock12(m)}`; }
+function tickClock() { document.querySelectorAll('.clk').forEach(el => el.textContent = clock12(nowMin())); }
+setInterval(tickClock, 1000);
+
+// ---------- 상태바 ----------
+const SBAR = `
+  <div class="t"><span class="clk">10:35</span></div>
+  <div class="r">
+    <svg viewBox="0 0 18 12" style="width:4.4cqw;height:2.9cqw"><rect x="0" y="8" width="3.2" height="4" rx=".8" fill="currentColor"/><rect x="4.8" y="5.5" width="3.2" height="6.5" rx=".8" fill="currentColor"/><rect x="9.6" y="3" width="3.2" height="9" rx=".8" fill="currentColor"/><rect x="14.4" y="0" width="3.2" height="12" rx=".8" fill="currentColor" opacity=".3"/></svg>
+    <svg viewBox="0 0 16 12" style="width:4.1cqw;height:3cqw"><path d="M8 11.6 5.6 9.2a3.4 3.4 0 0 1 4.8 0Z" fill="currentColor"/><path d="M3.6 7.2a6.2 6.2 0 0 1 8.8 0l-1.4 1.4a4.2 4.2 0 0 0-6 0Z" fill="currentColor"/><path d="M1.2 4.8a9.6 9.6 0 0 1 13.6 0l-1.4 1.4a7.6 7.6 0 0 0-10.8 0Z" fill="currentColor"/></svg>
+    <svg viewBox="0 0 30 13" style="width:7.4cqw;height:3.2cqw"><rect x=".5" y=".5" width="24" height="12" rx="3.8" fill="currentColor" opacity=".35"/><rect x=".5" y=".5" width="16.8" height="12" rx="3.8" fill="#ffd60a"/><rect x="25.6" y="4.2" width="1.8" height="4.6" rx=".9" fill="currentColor" opacity=".4"/><text x="10.5" y="9.9" text-anchor="middle" font-size="9.2" font-weight="700" font-family="-apple-system,Helvetica,Arial,sans-serif" fill="#000">70</text><path d="M21.6 1.6 17.4 7h2.6l-1.2 4.4L23 6h-2.6Z" fill="#000"/></svg>
+  </div>`;
+document.querySelectorAll('[data-sbar]').forEach(el => el.innerHTML = SBAR);
+tickClock();
+
+// 날짜 (접속한 날)
+const today = new Date();
+const DAYS = ['일','월','화','수','목','금','토'];
+$('lockDate').textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 (${DAYS[today.getDay()]})`;
+$('chatName').textContent = STORY.sender;
+$('callName').textContent = STORY.sender;
+$('vName').textContent = STORY.sender;
+
+// ---------- 소리 (아이폰 무음모드에서도 나오도록) ----------
+let actx = null;
+function unlockAudio() {
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const b = actx.createBuffer(1, 1, 22050), s = actx.createBufferSource();
+    s.buffer = b; s.connect(actx.destination); s.start(0);
+  } catch (e) {}
+}
+document.addEventListener('pointerdown', unlockAudio, { capture: true });
+document.addEventListener('touchend', unlockAudio, { capture: true });
+
+// 벨소리: 마림바 느낌의 짧은 멜로디를 반복 (직접 만든 소리)
+function marimba(freq, t, vol = 0.35) {
+  const g = actx.createGain(); g.connect(actx.destination);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+  const o1 = actx.createOscillator(); o1.type = 'sine'; o1.frequency.value = freq;
+  const o2 = actx.createOscillator(); o2.type = 'sine'; o2.frequency.value = freq * 4;
+  const g2 = actx.createGain(); g2.gain.setValueAtTime(0.25, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+  o1.connect(g); o2.connect(g2); g2.connect(g);
+  o1.start(t); o2.start(t); o1.stop(t + 0.6); o2.stop(t + 0.6);
+}
+const N = { C5: 523.25, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5, D6: 1174.66, E6: 1318.51, G6: 1567.98 };
+const PHRASE = [['E5',0],['G5',.14],['C6',.28],['G5',.42],['E6',.56],['D6',.84],['C6',.98],['A5',1.12],['C6',1.40]];
+let ringTimer = null;
+function ringOnce() {
+  if (!actx) return;
+  const t0 = actx.currentTime + 0.05;
+  PHRASE.forEach(([n, dt]) => marimba(N[n], t0 + dt));
+}
+function startRing() { ringOnce(); ringTimer = setInterval(ringOnce, 2600); }
+function stopRing() { clearInterval(ringTimer); ringTimer = null; }
+
+// ---------- 카톡 대화 기록 ----------
+// from: 'j' = 지마니, 'me' = 사랑이 / type: 'text' | 'photo' | 'call'
+const messages = [];
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function ymd(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+const TODAY = ymd(new Date());
+// 예전 기록 읽어오기
+(function parseHistory() {
+  let date = null;
+  HISTORY.split('\n').forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    if (line.startsWith('#')) { date = line.slice(1).trim(); return; }
+    const m = line.match(/^(\d{1,2}):(\d{2})\s+(지민|사랑)\s*:\s*(.*)$/);
+    if (!m || !date) return;
+    const msg = { date, min: (+m[1]) * 60 + (+m[2]), from: m[3] === '지민' ? 'j' : 'me', read: true };
+    const body = m[4];
+    let x;
+    if ((x = body.match(/^\[사진\s*([\d,\s]+)\]$/))) { msg.type = 'photo'; msg.photos = x[1].split(',').map(n => `img/chat/p${n.trim()}.jpg`); }
+    else if ((x = body.match(/^\[(보이스톡|페이스톡)\s*([\d:]+)\]$/))) { msg.type = 'call'; msg.kind = x[1]; msg.text = `통화시간 ${x[2]}`; }
+    else { msg.type = 'text'; msg.text = body; }
+    messages.push(msg);
+  });
+})();
+const CAM_ICON = '<svg viewBox="0 0 24 24" style="width:4.6cqw;height:4.6cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#555"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#555"/></svg>';
+const PHONE_ICON = '<svg viewBox="0 0 24 24" style="width:4.4cqw;height:4.4cqw"><path d="M7.2 3.5c.5-.2 1.1 0 1.4.5l1.7 3c.3.5.2 1.1-.2 1.5L8.8 9.7c.9 2.2 2.6 3.9 4.8 4.8l1.2-1.3c.4-.4 1-.5 1.5-.2l3 1.7c.5.3.7.9.5 1.4l-.7 1.9c-.3.8-1.1 1.3-2 1.2C10.6 18.7 5.3 13.4 4.8 6.9c-.1-.9.4-1.7 1.2-2Z" fill="#555"/></svg>';
+function bubble(m, tail) {
+  if (m.type === 'photo') {
+    const cls = m.photos.length > 1 ? ' two' : '';
+    return `<div class="k-photo${cls}">${m.photos.map(src => `<img src="${src}" alt="" data-full="${src}">`).join('')}</div>`;
+  }
+  if (m.type === 'call') {
+    const kind = m.kind || '페이스톡';
+    return `<div class="k-bub k-call${m.missed ? ' miss' : ''}${tail ? ' first' : ''}"><div class="ic">${kind === '보이스톡' ? PHONE_ICON : CAM_ICON}</div><div><div class="t1">${kind}</div><div class="t2">${esc(m.text)}</div></div></div>`;
+  }
+  return `<div class="k-bub${tail ? ' first' : ''}">${esc(m.text)}</div>`;
+}
+const DATE_ICON = '<svg viewBox="0 0 24 24" style="width:3.2cqw;height:3.2cqw"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="#fff" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+function dateLine(ds) {
+  const [y, mo, d] = ds.split('-').map(Number);
+  const wd = DAYS[new Date(y, mo - 1, d).getDay()];
+  return `<div class="k-date">${DATE_ICON}${y}년 ${mo}월 ${d}일 ${wd}요일</div>`;
+}
+let stickBottom = true;
+function renderChat() {
+  const body = $('chatBody');
+  let html = '';
+  const groups = [];
+  messages.forEach(m => {
+    const g = groups[groups.length - 1];
+    if (g && g.from === m.from && g.date === m.date && g.min === m.min) g.items.push(m);
+    else groups.push({ from: m.from, date: m.date, min: m.min, items: [m] });
+  });
+  // 오늘 날짜 줄은 항상 표시
+  let lastDate = null;
+  const ensureDate = d => { if (d !== lastDate) { html += dateLine(d); lastDate = d; } };
+  groups.forEach(g => {
+    ensureDate(g.date);
+    const t = `<span class="k-time">${kakaoTime(g.min)}</span>`;
+    if (g.from === 'j') {
+      html += `<div class="k-grp"><img class="pf" src="img/jimin.jpg" alt=""><div class="col"><div class="who">${esc(STORY.sender)}</div>`;
+      g.items.forEach((m, i) => {
+        html += `<div class="k-line">${bubble(m, i === 0)}${i === g.items.length - 1 ? t : ''}</div>`;
+      });
+      html += `</div></div>`;
+    } else {
+      html += `<div class="k-me">`;
+      g.items.forEach((m, i) => {
+        const meta = `<div class="k-meta">${m.read ? '' : '<span class="unread">1</span>'}${i === g.items.length - 1 ? t : ''}</div>`;
+        html += `<div class="k-line">${meta}${bubble(m, i === 0)}</div>`;
+      });
+      html += `</div>`;
+    }
+  });
+  ensureDate(TODAY);
+  body.innerHTML = html;
+  body.scrollTop = body.scrollHeight;
+  stickBottom = true;
+  body.querySelectorAll('img').forEach(im => { if (!im.complete) im.addEventListener('load', () => { if (stickBottom) body.scrollTop = body.scrollHeight; }); });
+}
+$('chatBody').addEventListener('touchstart', () => { stickBottom = false; }, { passive: true });
+$('chatBody').addEventListener('wheel', () => { stickBottom = false; }, { passive: true });
+function addMsg(m) { m.min = nowMin(); m.date = TODAY; messages.push(m); renderChat(); }
+
+// 사진 누르면 크게 보기
+$('chatBody').addEventListener('click', e => {
+  const im = e.target.closest('img[data-full]');
+  if (!im) return;
+  $('viewerImg').src = im.dataset.full;
+  $('viewer').classList.add('open');
+});
+$('viewer').addEventListener('click', () => $('viewer').classList.remove('open'));
+
+// ---------- 알림 ----------
+function makeCard(text) {
+  const el = document.createElement('div');
+  el.className = 'noti';
+  el.innerHTML = `<div class="ava"><img class="pic" src="img/jimin.jpg" alt=""><img class="app" src="img/kakao.png" alt=""></div>
+    <div class="txt"><div class="row"><span class="title"></span><span class="when">지금</span></div>
+    <div class="body"></div></div>`;
+  el.querySelector('.title').textContent = STORY.sender;
+  el.querySelector('.body').textContent = text;
+  return el;
+}
+const notifs = $('notifs');
+function layoutStack() {
+  const cards = [...notifs.children];
+  cards.forEach((c, i) => {
+    const depth = cards.length - 1 - i;            // 0 = 가장 최근
+    c.classList.remove('behind', 'behind2');
+    c.style.zIndex = 10 - depth;
+    if (depth === 1) c.classList.add('behind');
+    else if (depth >= 2) c.classList.add('behind2');
+  });
+}
+const banner = $('banner');
+let bannerTimer;
+function bannerNotify(text) {
+  $('bannerTitle').textContent = STORY.sender;
+  $('bannerBody').textContent = text;
+  if (banner.classList.contains('show')) {
+    banner.classList.remove('pop'); void banner.offsetWidth; banner.classList.add('pop');
+  }
+  banner.classList.add('show');
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => banner.classList.remove('show'), 4000);
+}
+// 카톡 한 개 도착
+function deliver(text) {
+  addMsg({ from: 'j', type: 'text', text });
+  if (chatOpen) return;                           // 채팅방 보고 있으면 알림 없음
+  if (!unlocked) { notifs.appendChild(makeCard(text)); layoutStack(); }
+  else bannerNotify(text);
+}
+function deliverAll(list, delay, gap = STORY.gap, done) {
+  list.forEach((m, i) => setTimeout(() => { deliver(m); if (done && i === list.length - 1) done(); }, delay + i * gap));
+}
+// 카톡을 실제로 치는 것처럼: 글자 수에 따라 간격이 달라짐
+function typeOut(list, delay, done) {
+  let t = delay;
+  list.forEach((m, i) => {
+    if (i > 0) t += 700 + [...m].length * 110;
+    setTimeout(() => { deliver(m); if (done && i === list.length - 1) done(); }, t);
+  });
+}
+deliverAll(STORY.firstMessages, STORY.firstDelay);
+
+// ---------- 채팅방 열기/닫기 ----------
+function openChat() {
+  banner.classList.remove('show');
+  chat.classList.remove('closing');
+  chat.classList.add('open');
+  chatOpen = true;
+  renderChat();
+  if (!callStarted) { callStarted = true; setTimeout(incomingCall, STORY.callDelay); }
+}
+function closeChat() {
+  chatOpen = false;
+  chat.classList.remove('open'); chat.classList.add('closing');
+  setTimeout(() => chat.classList.remove('closing'), 300);
+}
+banner.addEventListener('click', openChat);
+$('kakaoIcon').addEventListener('click', openChat);
+$('chatBack').addEventListener('click', closeChat);
+
+// ---------- 페이스톡 ----------
+let missTimer;
+function incomingCall() {
+  if (inCall || ringing) return;
+  ringing = true;
+  $('chatInput').blur();
+  $('call').classList.add('open');
+  banner.classList.remove('show');
+  startRing();
+  missTimer = setTimeout(declineCall, STORY.missedAfter);
+}
+function declineCall() {
+  if (!ringing) return;
+  ringing = false;
+  clearTimeout(missTimer); stopRing();
+  $('call').classList.remove('open');
+  addMsg({ from: 'j', type: 'call', text: '부재중', missed: true });
+  mode = 'decline';
+  if (!chatOpen) bannerNotify('부재중 페이스톡');
+  typeOut(STORY.afterDecline, STORY.afterDeclineDelay, enableTyping);
+}
+let tick, secs = 0;
+const vid = $('vid'), vidMe = $('vidMe');
+function acceptCall() {
+  if (!ringing) return;
+  ringing = false;
+  clearTimeout(missTimer); stopRing();
+  $('call').classList.remove('open');
+  $('vcall').classList.add('open');
+  inCall = true; secs = 0; $('vTime').textContent = '00:00';
+  tick = setInterval(() => { secs++; $('vTime').textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`; }, 1000);
+  [vid, vidMe].forEach(v => { v.style.display = ''; v.onerror = () => { v.style.display = 'none'; }; });
+  vid.onended = () => setTimeout(() => endCall(true), 600);
+  if (!vid.getAttribute('src')) { vid.src = STORY.videoJimin; vidMe.src = STORY.videoMe; }
+  vid.currentTime = 0; vidMe.currentTime = 0;
+  // 두 영상을 동시에 재생 (사랑이 화면은 소리 없음)
+  [vid.play(), vidMe.play()].forEach(p => p && p.catch && p.catch(() => {}));
+}
+function endCall(finished) {
+  if (!inCall) return;
+  inCall = false; clearInterval(tick);
+  vid.pause(); vidMe.pause();
+  $('vcall').classList.remove('open');
+  const mm = String(Math.floor(secs / 60)).padStart(2, '0'), ss = String(secs % 60).padStart(2, '0');
+  addMsg({ from: 'j', type: 'call', text: `통화시간 ${mm}:${ss}` });
+  if (finished === true) {
+    callDone = true;
+    typeOut(STORY.afterCall, STORY.afterCallDelay, enableTyping);
+  } else {
+    mode = 'earlyEnd';               // 중간에 끊음
+    typeOut(STORY.earlyEnd, STORY.afterDeclineDelay, enableTyping);
+  }
+}
+$('declineBtn').addEventListener('click', declineCall);
+$('acceptBtn').addEventListener('click', acceptCall);
+$('endBtn').addEventListener('click', () => endCall(false));
+
+// ---------- 독자가 직접 카톡 보내기 ----------
+const input = $('chatInput'), bar = $('inputBar');
+let mode = 'decline';   // 'decline' = 거절 후, 'earlyEnd' = 통화 중간에 끊은 후
+function enableTyping() {
+  if (!input.disabled) return;
+  input.disabled = false;
+  input.placeholder = '';
+}
+input.addEventListener('input', () => bar.classList.toggle('typing', input.value.trim().length > 0));
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); sendMine(); } });
+$('sendBtn').addEventListener('pointerdown', e => { e.preventDefault(); sendMine(); });   // 키보드 안 내려가게
+function sendMine() {
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; bar.classList.remove('typing');
+  const mine = { from: 'me', type: 'text', text, read: false };
+  addMsg(mine);
+  if (callDone) return;            // 페이스톡 이후엔 지마니가 안 읽음 (1 그대로)
+  const rules = mode === 'earlyEnd'
+    ? [{ keywords: STORY.earlyEndKeywords, action: 'call' }]
+    : STORY.replies;
+  const rule = rules.find(r => r.keywords.some(k => text.includes(k)));
+  // 지마니가 읽음 (1 사라짐)
+  setTimeout(() => {
+    messages.forEach(m => { if (m.from === 'me') m.read = true; });
+    renderChat();
+    if (!rule) return;
+    if (rule.action === 'call') setTimeout(incomingCall, 2500);
+    else typeOut(rule.messages, 1800);
+  }, STORY.readDelay);
+}
+
+// ---------- 위로 쓸어올려 잠금해제 / 알림 누르기 ----------
+let startY = null, startT = 0, lastY = 0;
+function h() { return phone.getBoundingClientRect().height; }
+function setLift(px) {
+  const lift = Math.max(0, px);
+  lock.style.transform = `translateY(${-lift}px)`;
+  const p = Math.min(1, lift / (h() * 0.6));
+  home.style.opacity = p;
+  home.style.transform = `scale(${1.12 - 0.12 * p})`;
+}
+function doUnlock() {
+  unlocked = true;
+  lock.classList.add('anim');
+  lock.style.transform = `translateY(-100%)`;
+  home.style.opacity = ''; home.style.transform = '';
+  home.classList.add('on');
+  setTimeout(() => { lock.style.display = 'none'; }, 460);
+}
+lock.addEventListener('pointerdown', e => {
+  if (unlocked) return;
+  startY = lastY = e.clientY; startT = performance.now();
+  lock.classList.remove('anim');
+  home.style.transition = 'none';
+  lock.setPointerCapture(e.pointerId);
+});
+lock.addEventListener('pointermove', e => {
+  if (startY === null) return;
+  lastY = e.clientY;
+  setLift(startY - e.clientY);
+});
+function endDrag(e) {
+  if (startY === null) return;
+  const dist = startY - lastY;
+  const v = dist / Math.max(1, performance.now() - startT);
+  startY = null;
+  home.style.transition = '';
+  // 탭: 알림을 눌렀으면 잠금해제하면서 채팅방 열기
+  if (Math.abs(dist) < 8 && e && e.type === 'pointerup') {
+    const hit = [...notifs.children].some(c => {
+      const b = c.getBoundingClientRect();
+      return e.clientY >= b.top && e.clientY <= b.bottom && e.clientX >= b.left && e.clientX <= b.right;
+    });
+    lock.classList.add('anim'); lock.style.transform = '';
+    home.style.opacity = ''; home.style.transform = '';
+    if (hit) { openChat(); doUnlock(); }
+    return;
+  }
+  if (dist > h() * 0.22 || (v > 0.5 && dist > 30)) {
+    doUnlock();
+  } else {
+    lock.classList.add('anim');
+    lock.style.transform = '';
+    home.style.opacity = ''; home.style.transform = '';
+  }
+}
+lock.addEventListener('pointerup', endDrag);
+lock.addEventListener('pointercancel', endDrag);
+
+// 컴퓨터에서: 마우스 휠을 굴려도 잠금해제
+let wheelAcc = 0;
+window.addEventListener('wheel', e => {
+  if (unlocked) return;
+  wheelAcc += e.deltaY;
+  if (wheelAcc > 120) doUnlock();
+}, { passive: true });
+
+renderChat();
+</script>
+</body>
+</html>
