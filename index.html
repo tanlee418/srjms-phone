@@ -174,6 +174,26 @@
   .k-photo.wide img { width: 56cqw; }
   .k-photo.two { display: grid; grid-template-columns: 1fr 1fr; gap: .6cqw; }
   .k-photo.two img { width: 29cqw; height: 29cqw; object-fit: cover; }
+  .k-photo.multi { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6cqw; }
+  .k-photo.multi img { width: 19.5cqw; height: 19.5cqw; object-fit: cover; }
+  /* 앨범 고르기 화면 */
+  #album { z-index: 12; display: none; background: #fff; flex-direction: column; }
+  #album.open { display: flex; animation: plusIn .25s ease both; }
+  #album .head { flex: none; position: relative; height: 25cqw; }
+  #album .head .nav { position: absolute; left: 0; right: 0; top: 13.5cqw; height: 11cqw; display: flex; align-items: center; justify-content: space-between; padding: 0 3.6cqw; }
+  #album .head .x { width: 9cqw; height: 9cqw; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  #album .head .ttl { position: absolute; left: 50%; transform: translateX(-50%); font-size: 4.4cqw; font-weight: 600; color: #222; display: flex; align-items: center; gap: 1cqw; }
+  #album .head .send { font-size: 4.1cqw; font-weight: 600; color: #bbb; padding: 1.6cqw 2cqw; cursor: default; }
+  #album .head .send.on { color: #222; cursor: pointer; }
+  #album .head .send b { display: inline-flex; min-width: 5cqw; height: 5cqw; border-radius: 2.5cqw; background: #fee500; color: #3a2a00; font-size: 3.1cqw; align-items: center; justify-content: center; margin-left: 1cqw; padding: 0 1.2cqw; }
+  #album .grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 33.2cqw; gap: .4cqw; align-content: start; touch-action: pan-y; scrollbar-width: none; }
+  #album .grid::-webkit-scrollbar { display: none; }
+  #album .cell { position: relative; overflow: hidden; cursor: pointer; background: #eee; }
+  #album .cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .15s; }
+  #album .cell .ck { position: absolute; top: 1.6cqw; right: 1.6cqw; width: 6cqw; height: 6cqw; border-radius: 50%; border: .45cqw solid #fff; background: rgba(0,0,0,.18); color: #3a2a00; font-size: 3.2cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  #album .cell.sel img { transform: scale(.92); }
+  #album .cell.sel::after { content: ""; position: absolute; inset: 0; border: .7cqw solid #fee500; pointer-events: none; }
+  #album .cell.sel .ck { background: #fee500; border-color: #fee500; }
   .k-me .k-call { background: #fee500; }
   .k-me .k-call .ic { background: rgba(0,0,0,.07); }
   .k-me .k-call .t2 { color: #6b5b00; }
@@ -188,6 +208,38 @@
   .k-call .t1 { font-size: 3.9cqw; }
   .k-call .t2 { font-size: 3.1cqw; color: #8a8a8a; margin-top: .2cqw; }
   .k-call.miss .t2 { color: #e5484d; }
+  /* + 메뉴 */
+  .plus-btn { flex: none; width: 7cqw; height: 7cqw; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .2s; }
+  .k-input.plus-open .plus-btn { transform: rotate(45deg); }
+  .k-input.plus-open { padding-bottom: 2.2cqw; }
+  .k-plus { flex: none; display: none; grid-template-columns: repeat(4, 1fr); row-gap: 5cqw; padding: 5cqw 3cqw 11cqw; background: #fff; border-top: 1px solid #eee; }
+  .k-plus.open { display: grid; animation: plusIn .22s ease both; }
+  @keyframes plusIn { from { transform: translateY(6cqw); opacity: 0; } to { transform: none; opacity: 1; } }
+  .k-plus .it { display: flex; flex-direction: column; align-items: center; gap: 1.8cqw; font-size: 3.1cqw; color: #444; }
+  .k-plus .ic { width: 13.5cqw; height: 13.5cqw; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  #plusFaceTalk, #plusCamera, #plusAlbum { cursor: pointer; }
+  #plusAlbum:active .ic { filter: brightness(.9); }
+  #plusCamera:active .ic { filter: brightness(.9); }
+  /* 카메라 화면 */
+  #cam { z-index: 12; display: none; background: #000; }
+  #cam.open { display: block; animation: camIn .3s ease both; }
+  @keyframes camIn { from { opacity: 0; } to { opacity: 1; } }
+  #cam .view { position: absolute; left: 0; right: 0; top: 13.5cqw; height: calc(100% - 13.5cqw - 44cqw); overflow: hidden; }
+  #cam .view img, #cam .view video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #cam .top { position: absolute; left: 0; right: 0; top: 13.5cqw; height: 13cqw; display: flex; align-items: center; justify-content: space-between; padding: 0 4.5cqw; z-index: 2; }
+  #cam .top .x { width: 9cqw; height: 9cqw; display: flex; align-items: center; justify-content: center; cursor: pointer; filter: drop-shadow(0 0 1cqw rgba(0,0,0,.4)); }
+  #cam .modes { position: absolute; left: 0; right: 0; bottom: 34cqw; display: flex; justify-content: center; gap: 7cqw; font-size: 3.4cqw; color: rgba(255,255,255,.55); font-weight: 600; }
+  #cam .modes .on { color: #fee500; }
+  #cam .bottom { position: absolute; left: 0; right: 0; bottom: 8cqw; height: 22cqw; display: flex; align-items: center; justify-content: space-between; padding: 0 10cqw; }
+  #cam .thumb { width: 11cqw; height: 11cqw; border-radius: 2cqw; background: #2a2a2a center / cover no-repeat; border: .4cqw solid rgba(255,255,255,.25); }
+  #cam .shutter { width: 19cqw; height: 19cqw; border-radius: 50%; border: 1.2cqw solid #fff; padding: 1.2cqw; cursor: pointer; }
+  #cam .shutter i { display: block; width: 100%; height: 100%; border-radius: 50%; background: #fff; transition: transform .1s; }
+  #cam .shutter:active i { transform: scale(.88); }
+  #cam .flip { width: 11cqw; height: 11cqw; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; }
+  #cam .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 3; }
+  #cam .flash.go { animation: flash .35s ease-out; }
+  @keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+  #plusFaceTalk:active .ic { filter: brightness(.9); }
   .k-input {
     flex: none; background: #fff; padding: 2.2cqw 3cqw 9cqw; display: flex; align-items: center; gap: 2.6cqw;
   }
@@ -289,7 +341,7 @@
     </div>
     <div class="k-body" id="chatBody"></div>
     <div class="k-input" id="inputBar">
-      <svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw;flex:none"><path d="M12 4v16M4 12h16" stroke="#555" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="plus-btn" id="plusBtn"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M12 4v16M4 12h16" stroke="#555" stroke-width="1.8" stroke-linecap="round"/></svg></div>
       <div class="field">
         <input id="chatInput" type="text" enterkeyhint="send" autocomplete="off" disabled>
         <svg viewBox="0 0 24 24" style="width:5.8cqw;height:5.8cqw"><circle cx="12" cy="12" r="8.6" fill="none" stroke="#666" stroke-width="1.6"/><circle cx="9" cy="10" r="1.1" fill="#666"/><circle cx="15" cy="10" r="1.1" fill="#666"/><path d="M8.3 14c1 1.6 2.3 2.4 3.7 2.4s2.7-.8 3.7-2.4" fill="none" stroke="#666" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -297,6 +349,16 @@
       <svg class="hash" viewBox="0 0 24 24" style="width:6.2cqw;height:6.2cqw;flex:none"><path d="M9.5 4 8 20M16 4l-1.5 16M4.5 9h16M3.5 15h16" stroke="#555" stroke-width="1.7" stroke-linecap="round"/></svg>
       <div class="send" id="sendBtn"><svg viewBox="0 0 24 24" style="width:5.4cqw;height:5.4cqw"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="#3a2a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     </div>
+  <div class="k-plus" id="plusPanel">
+    <div class="it" id="plusAlbum"><div class="ic" style="background:#7ec36b"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="4" y="5" width="16" height="14" rx="2.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="9" cy="10" r="1.6" fill="#fff"/><path d="m5 17 5-5 3.5 3.5L16 13l3 3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></div><span>앨범</span></div>
+    <div class="it" id="plusCamera"><div class="ic" style="background:#5aa0e8"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M4 9a2 2 0 0 1 2-2h2l1.4-2h5.2L16 7h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="#fff" stroke-width="1.8"/></svg></div><span>카메라</span></div>
+    <div class="it"><div class="ic" style="background:#f06f6f"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="4.5" y="10" width="15" height="9.5" rx="1.5" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M3.5 7.5h17V10h-17ZM12 7.5v12M12 7.5C10 4 7 4.5 7.6 6.6 8 7.6 12 7.5 12 7.5Zm0 0c2-3.5 5-3 4.4-.9-.4 1-4.4.9-4.4.9Z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><span>선물하기</span></div>
+    <div class="it" id="plusFaceTalk"><div class="ic" style="background:#3ec26e"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#fff"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#fff"/></svg></div><span>페이스톡</span></div>
+    <div class="it"><div class="ic" style="background:#45b3a6"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M7.2 3.5c.5-.2 1.1 0 1.4.5l1.7 3c.3.5.2 1.1-.2 1.5L8.8 9.7c.9 2.2 2.6 3.9 4.8 4.8l1.2-1.3c.4-.4 1-.5 1.5-.2l3 1.7c.5.3.7.9.5 1.4l-.7 1.9c-.3.8-1.1 1.3-2 1.2C10.6 18.7 5.3 13.4 4.8 6.9c-.1-.9.4-1.7 1.2-2Z" fill="#fff"/></svg></div><span>보이스톡</span></div>
+    <div class="it"><div class="ic" style="background:#f2b23c"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M8 9l2 6 2-5 2 5 2-6M7.5 12h9" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div><span>송금</span></div>
+    <div class="it"><div class="ic" style="background:#e57fb8"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><rect x="4" y="5.5" width="16" height="14" rx="2.5" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div><span>일정</span></div>
+    <div class="it"><div class="ic" style="background:#8f96a3"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20Z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3.5V8h4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></div><span>파일</span></div>
+  </div>
     <div class="home-ind"></div>
   </div>
 
@@ -333,6 +395,38 @@
       <div class="btn no" id="declineBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:8.5cqw;height:8.5cqw"><path d="M12 9.5c-3.4 0-6.5 1-8.4 2.6-.6.5-.7 1.4-.3 2l1.2 1.7c.4.6 1.2.8 1.9.5l2.4-1c.6-.3 1-.9.9-1.5l-.1-1.3c1.5-.5 3.3-.5 4.8 0l-.1 1.3c0 .6.3 1.2.9 1.5l2.4 1c.7.3 1.5.1 1.9-.5l1.2-1.7c.4-.6.3-1.5-.3-2C18.5 10.5 15.4 9.5 12 9.5Z" fill="#fff"/></svg></div>거절</div>
       <div class="btn yes" id="acceptBtn"><div class="c"><svg viewBox="0 0 24 24" style="width:8.5cqw;height:8.5cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#fff"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#fff"/></svg></div>수락</div>
     </div>
+    <div class="home-ind" style="background:#fff"></div>
+  </div>
+
+  <!-- 앨범 고르기 (+ 메뉴 → 앨범) -->
+  <div class="screen" id="album">
+    <div class="head">
+      <div class="sbar dark" data-sbar></div>
+      <div class="nav">
+        <div class="x" id="albumClose"><svg viewBox="0 0 24 24" style="width:6cqw;height:6cqw"><path d="M5 5l14 14M19 5 5 19" stroke="#222" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="ttl">최근 항목<svg viewBox="0 0 24 24" style="width:4cqw;height:4cqw"><path d="m6 9 6 6 6-6" fill="none" stroke="#222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="send" id="albumSend">전송</div>
+      </div>
+    </div>
+    <div class="grid" id="albumGrid"></div>
+    <div class="home-ind"></div>
+  </div>
+
+  <!-- 카메라 화면 (+ 메뉴 → 카메라) -->
+  <div class="screen" id="cam">
+    <div class="sbar light" data-sbar></div>
+    <div class="view"><img src="img/camera_first.jpg" alt=""><video id="vidCam" playsinline muted loop preload="auto"></video></div>
+    <div class="top">
+      <div class="x" id="camClose"><svg viewBox="0 0 24 24" style="width:6.4cqw;height:6.4cqw"><path d="M5 5l14 14M19 5 5 19" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <svg viewBox="0 0 24 24" style="width:6cqw;height:6cqw;filter:drop-shadow(0 0 1cqw rgba(0,0,0,.4))"><path d="M13 2.5 5.5 13.5H11l-1 8 7.5-11H12Z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M4 4l16 16" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </div>
+    <div class="modes"><span>동영상</span><span class="on">사진</span><span>보정</span></div>
+    <div class="bottom">
+      <div class="thumb" style="background-image:url(img/chat/p9.jpg)"></div>
+      <div class="shutter" id="camShutter"><i></i></div>
+      <div class="flip"><svg viewBox="0 0 24 24" style="width:6cqw;height:6cqw"><path d="M4 9.5A2.5 2.5 0 0 1 6.5 7h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 9.5v7.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17Z" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9 12.5a3 3 0 0 1 5.4-1.6M15 14a3 3 0 0 1-5.4 1.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="flash" id="camFlash"></div>
     <div class="home-ind" style="background:#fff"></div>
   </div>
 
@@ -413,7 +507,21 @@ const STORY = {
   heartDelay: 2500,
 
   videoJimin: "video/jimin.mp4",        // 페이스톡 큰 화면 (지마니)
-  videoMe: "video/sarang.mp4"           // 페이스톡 작은 화면 (사랑이)
+  videoMe: "video/sarang.mp4",
+  cameraVideo: "video/camera.mp4",      // + 메뉴 → 카메라 누르면 나오는 화면
+  cameraShot: "img/camera_first.jpg",   // 카메라 셔터를 누르면 앨범에 추가되는 사진
+
+  // + 메뉴 → 앨범에 보이는 사진 (img/album/a1.jpg ~ a9.jpg)
+  albumCount: 9,
+  photoReply: ["ㅎㅎ 예뿌네", "저장해도 돼?"],      // 사진을 보내면
+  photoSpecial: { photo: 7, messages: ["우리 잘 어울린당 ㅎㅎ"] }, // 7번 사진이 들어 있으면 대신 이 답장
+  saveYesKeywords: ["웅", "응", "ㅇㅇ", "그래", "당연", "넹", "네"],
+  saveThanks: ["고마오"],
+
+  // "사진 보내줘" 같은 말을 하면 지마니가 이 중 한 장을 랜덤으로 보냄 (img/jimin_pics/j1.jpg ~ j5.jpg)
+  selfieCount: 5,
+  selfieWords: ["사진", "셀카", "얼굴", "셀피"],          // 이 중 하나와
+  selfieAsk: ["보내", "줘", "주라", "줄래", "보여", "찍어", "좀", "조"],  // 이 중 하나가 같이 있으면           // 페이스톡 작은 화면 (사랑이)
 };
 /* =========================================================
    ✏️ 예전 카톡 기록 ("사랑아 모해?" 이전 대화)
@@ -652,10 +760,10 @@ const TODAY = ymd(new Date());
 })();
 const CAM_ICON = '<svg viewBox="0 0 24 24" style="width:4.6cqw;height:4.6cqw"><rect x="3" y="7" width="12" height="10" rx="2.5" fill="#555"/><path d="m16.5 11 4.2-2.6c.3-.2.8 0 .8.4v6.4c0 .4-.5.6-.8.4L16.5 13Z" fill="#555"/></svg>';
 const PHONE_ICON = '<svg viewBox="0 0 24 24" style="width:4.4cqw;height:4.4cqw"><path d="M7.2 3.5c.5-.2 1.1 0 1.4.5l1.7 3c.3.5.2 1.1-.2 1.5L8.8 9.7c.9 2.2 2.6 3.9 4.8 4.8l1.2-1.3c.4-.4 1-.5 1.5-.2l3 1.7c.5.3.7.9.5 1.4l-.7 1.9c-.3.8-1.1 1.3-2 1.2C10.6 18.7 5.3 13.4 4.8 6.9c-.1-.9.4-1.7 1.2-2Z" fill="#555"/></svg>';
-const PHOTO_RATIO = { 'img/chat/p7.jpg': '4 / 3' };   // 가로 사진만 적어두기 (나머지는 세로 3:4)
+const PHOTO_RATIO = { 'img/chat/p7.jpg': '4 / 3', 'img/jimin_pics/j4.jpg': '4 / 3' };   // 가로 사진만 적어두기 (나머지는 세로 3:4)
 function bubble(m, tail) {
   if (m.type === 'photo') {
-    const cls = m.photos.length > 1 ? ' two' : '';
+    const cls = m.photos.length >= 3 ? ' multi' : m.photos.length === 2 ? ' two' : '';
     // 사진 비율을 미리 정해둬서 불러오는 동안 화면이 밀리지 않게
     const ratio = src => (PHOTO_RATIO[src] || '3 / 4');
     return `<div class="k-photo${cls}">${m.photos.map(src => `<img src="${src}" alt="" data-full="${src}" style="aspect-ratio:${m.photos.length > 1 ? '1 / 1' : ratio(src)}">`).join('')}</div>`;
@@ -807,6 +915,20 @@ function deliver(text) {
   if (!unlocked) { notifs.appendChild(makeCard(text)); layoutStack(); }
   else bannerNotify(text);
 }
+// 지마니가 사진 한 장 보내기 (직전에 보낸 사진은 피해서 랜덤)
+let lastSelfie = 0;
+function sendSelfie() {
+  let n;
+  do { n = 1 + Math.floor(Math.random() * STORY.selfieCount); } while (STORY.selfieCount > 1 && n === lastSelfie);
+  lastSelfie = n;
+  addMsg({ from: 'j', type: 'photo', photos: [`img/jimin_pics/j${n}.jpg`] });
+  if (chatOpen) return;
+  if (!unlocked) { notifs.appendChild(makeCard('사진을 보냈습니다.')); layoutStack(); }
+  else bannerNotify('사진을 보냈습니다.');
+}
+function isSelfieAsk(text) {
+  return STORY.selfieWords.some(w => text.includes(w)) && STORY.selfieAsk.some(w => text.includes(w));
+}
 function deliverAll(list, delay, gap = STORY.gap, done) {
   list.forEach((m, i) => setTimeout(() => { deliver(m); if (done && i === list.length - 1) done(); }, delay + i * gap));
 }
@@ -828,7 +950,7 @@ function openChat() {
   chatOpen = true;
   if (!rendered) renderChat();
   else { const b = $('chatBody'); b.scrollTop = b.scrollHeight; }
-  if (!callStarted) { callStarted = true; setTimeout(incomingCall, STORY.callDelay); }
+  if (!callStarted) { callStarted = true; firstCallTimer = setTimeout(incomingCall, STORY.callDelay); }
 }
 function closeChat() {
   chatOpen = false;
@@ -842,9 +964,11 @@ $('chatBack').addEventListener('click', closeChat);
 // ---------- 페이스톡 ----------
 let missTimer;
 function incomingCall() {
-  if (inCall || ringing) return;
+  if (inCall || ringing || outgoing) return;
   ringing = true;
   $('chatInput').blur();
+  vidCam.pause(); $('cam').classList.remove('open');
+  $('album').classList.remove('open');
   $('call').classList.add('open');
   banner.classList.remove('show');
   startRing();
@@ -902,7 +1026,7 @@ function endCall(finished) {
   }
 }
 // 사랑이가 거는 페이스톡
-let pickupTimer, outgoing = false;
+let pickupTimer, outgoing = false, firstCallTimer;
 function outgoingCall() {
   if (inCall || ringing || outgoing) return;
   outgoing = true;
@@ -932,6 +1056,107 @@ function cancelOutgoing() {
   mode = 'busy';                            // 다시 "끝났어" 하면 또 걸 수 있음
 }
 $('cancelBtn').addEventListener('click', cancelOutgoing);
+
+// + 메뉴 → 페이스톡: 사랑이가 먼저 걸기
+function togglePlus(open) {
+  const want = open ?? !$('plusPanel').classList.contains('open');
+  $('plusPanel').classList.toggle('open', want);
+  $('inputBar').classList.toggle('plus-open', want);
+  if (want) $('chatInput').blur();
+  const b = $('chatBody'); b.scrollTop = b.scrollHeight;
+}
+$('plusBtn').addEventListener('click', () => togglePlus());
+// + 메뉴 → 카메라: 셀카 화면이 켜짐
+const vidCam = $('vidCam');
+$('plusCamera').addEventListener('click', () => {
+  togglePlus(false);
+  if (inCall || ringing || outgoing) return;
+  $('cam').classList.add('open');
+  if (!vidCam.getAttribute('src')) vidCam.src = STORY.cameraVideo;
+  vidCam.currentTime = 0;
+  const p = vidCam.play(); if (p && p.catch) p.catch(() => {});
+});
+$('camClose').addEventListener('click', () => { vidCam.pause(); $('cam').classList.remove('open'); });
+
+// + 메뉴 → 앨범: 사진 골라서 보내기
+let picked = [];
+function albumList() {
+  const list = [];
+  for (let i = 0; i < shots; i++) list.push({ src: STORY.cameraShot, n: 0, key: 'shot' + i });     // 방금 찍은 사진이 맨 앞
+  for (let i = 1; i <= STORY.albumCount; i++) list.push({ src: `img/album/a${i}.jpg`, n: i, key: 'a' + i });
+  return list;
+}
+function drawAlbum() {
+  const items = albumList();
+  $('albumGrid').innerHTML = items.map(it => {
+    const idx = picked.findIndex(p => p.key === it.key);
+    return `<div class="cell${idx >= 0 ? ' sel' : ''}" data-key="${it.key}"><img src="${it.src}" alt="" loading="lazy"><div class="ck">${idx >= 0 ? idx + 1 : ''}</div></div>`;
+  }).join('');
+  updateSend();
+}
+// 선택만 바뀔 때는 사진을 다시 그리지 않고 표시만 바꿈
+function updateSel() {
+  $('albumGrid').querySelectorAll('.cell').forEach(c => {
+    const idx = picked.findIndex(p => p.key === c.dataset.key);
+    c.classList.toggle('sel', idx >= 0);
+    c.querySelector('.ck').textContent = idx >= 0 ? idx + 1 : '';
+  });
+  updateSend();
+}
+function updateSend() {
+  const send = $('albumSend');
+  send.classList.toggle('on', picked.length > 0);
+  send.innerHTML = picked.length ? `전송<b>${picked.length}</b>` : '전송';
+}
+$('plusAlbum').addEventListener('click', () => {
+  togglePlus(false);
+  if (inCall || ringing || outgoing) return;
+  picked = []; drawAlbum();
+  $('albumGrid').scrollTop = 0;
+  $('album').classList.add('open');
+});
+$('albumClose').addEventListener('click', () => $('album').classList.remove('open'));
+$('albumGrid').addEventListener('click', e => {
+  const cell = e.target.closest('.cell'); if (!cell) return;
+  const key = cell.dataset.key;
+  const idx = picked.findIndex(p => p.key === key);
+  if (idx >= 0) picked.splice(idx, 1);
+  else { const it = albumList().find(x => x.key === key); if (picked.length < 30) picked.push(it); }
+  updateSel();
+});
+$('albumSend').addEventListener('click', () => {
+  if (!picked.length) return;
+  $('album').classList.remove('open');
+  const msg = { from: 'me', type: 'photo', photos: picked.map(p => p.src), read: false };
+  const special = picked.some(p => p.n === STORY.photoSpecial.photo);
+  picked = [];
+  addMsg(msg);
+  // 지마니가 읽고 답장
+  setTimeout(() => {
+    markAllRead();
+    if (special) { pendingSave = false; typeOut(STORY.photoSpecial.messages, 1500); }
+    else typeOut(STORY.photoReply, 1500, () => { pendingSave = true; });
+  }, STORY.readDelay);
+});
+// 셔터: 찰칵 하고 화면이 반짝 (사진은 저장되지 않음)
+let shots = 0, pendingSave = false;   // 카메라로 찍은 사진 수 (앨범 맨 앞에 추가됨)
+$('camShutter').addEventListener('click', () => {
+  shots++;
+  const f = $('camFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  if (!actx) return;
+  const t = actx.currentTime, len = 0.08;
+  const buf = actx.createBuffer(1, Math.floor(actx.sampleRate * len), actx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+  const src = actx.createBufferSource(), g = actx.createGain(); g.gain.value = 0.5;
+  src.buffer = buf; src.connect(g); g.connect(actx.destination); src.start(t);
+});
+$('chatInput').addEventListener('focus', () => togglePlus(false));
+$('plusFaceTalk').addEventListener('click', () => {
+  togglePlus(false);
+  if (inCall || ringing || outgoing) return;
+  clearTimeout(firstCallTimer);           // 지마니가 걸려던 전화보다 먼저 걸었으면 그건 취소
+  outgoingCall();
+});
 $('declineBtn').addEventListener('click', declineCall);
 $('acceptBtn').addEventListener('click', acceptCall);
 $('endBtn').addEventListener('click', () => endCall(false));
@@ -958,8 +1183,16 @@ function sendMine() {
   input.value = ''; bar.classList.remove('typing');
   const mine = { from: 'me', type: 'text', text, read: false };
   addMsg(mine);
+  if (pendingSave && STORY.saveYesKeywords.some(k => text.includes(k))) {
+    pendingSave = false;              // "저장해도 돼?" → "웅" → "고마오"
+    setTimeout(() => { markAllRead(); typeOut(STORY.saveThanks, 1300); }, STORY.readDelay);
+    return;
+  }
+  pendingSave = false;
   if (callDone) {
-    // 페이스톡 이후: 사랑한다는 답이면 읽고 하트 반응, 아니면 안 읽음 (1 그대로)
+    // 페이스톡 이후: 사진 달라고 하면 그건 보내줌
+    if (isSelfieAsk(text)) { setTimeout(() => { markAllRead(); setTimeout(sendSelfie, 2500); }, STORY.readDelay); return; }
+    // 사랑한다는 답이면 읽고 하트 반응, 아니면 안 읽음 (1 그대로)
     if (STORY.heartKeywords.some(k => text.includes(k))) {
       setTimeout(() => { markAllRead(); setTimeout(() => heartReact(mine), 700); }, STORY.heartDelay);
     }
@@ -969,6 +1202,7 @@ function sendMine() {
     : mode === 'busy' ? [{ keywords: STORY.doneKeywords, action: 'outcall' }]
     : STORY.replies;
   const rule = rules.find(r => r.keywords.some(k => text.includes(k)))
+    || (isSelfieAsk(text) ? { action: 'selfie' } : null)
     || STORY.anytime.find(r => r.keywords.some(k => text.includes(k)));
   // 지마니가 읽음 (1 사라짐)
   setTimeout(() => {
@@ -976,6 +1210,7 @@ function sendMine() {
     if (!rule) return;
     if (rule.action === 'call') setTimeout(incomingCall, 2500);
     else if (rule.action === 'outcall') setTimeout(outgoingCall, STORY.outCallDelay);
+    else if (rule.action === 'selfie') setTimeout(sendSelfie, 2500);   // 사진 고르고 보내는 시간
     else { if (rule.next) mode = rule.next; typeOut(rule.messages, 1800); }
   }, STORY.readDelay);
 }
